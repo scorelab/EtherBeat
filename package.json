@@ -1,13 +1,13 @@
 {
-  "name": "express-typescript-starter",
+  "name": "etherbeat",
   "version": "0.1.0",
-  "description": "A starting point for Node.js express apps with TypeScript",
+  "description": "EtherBear - monitoring service for smart contracts",
   "repository": {
     "type": "git",
-    "url": "https://github.com/sahat/hackathon-starter.git"
+    "url": "git+https://github.com/tharidu/EtherBeat.git"
   },
-  "author": "Bowden Kelly",
-  "license": "MIT",
+  "author": "",
+  "license": "",
   "scripts": {
     "start": "npm run build && npm run watch",
     "build": "npm run build-ts && npm run tslint",
