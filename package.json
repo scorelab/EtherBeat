@@ -1,24 +1,80 @@
 {
-  "name": "etherbeat",
-  "version": "0.0.1",
-  "description": "With the growing popularity of BitCoin in the last couple of years, other blockchains have been in development for solving various problems that need distributed consensus. Ethereum blockchain is one example, that gives users to develop \"smart contracts\" that runs in the blockchain.  This gives the ability to develop decentralized applications (or dApps). Users do not need to 'trust' anything or anybody.  In addition to that, dApps are always available and will be guaranteed to be available in the future as well.  Also, it is resistant to traditional attacks such as DDoS.  This framework has given many developers to write a decentralized application without much effort, without needing distributed systems or cryptography knowledge. Many startups are actively developing applications for Ethereum such as Ethereum Name Service (ENS), Etheria or WeiFund.  Unfortunately, because the technology being used is bleeding edge it is inevitable that attacks or hacks will target these apps for monetary reasons.  Last year DAO suffered a severe attack because of its security flaws. Due to that attack, 3.6m ether was stolen from DAO's smart contract.  Also, once you publish a smart contract in Ethereum it is not possible to modify or update it as a regular web application. Thus, even developers identify a critical bug in the contract it is not possible to push a bugfix in a straightforward way.  Thus, in order to fill the gap of not having a proper 'smart contract' compatible monitoring service, we propose to build a web application that can monitor other smart contracts in Ethereum and give the capability to safeguard it's critical functions (Ether send and receive) and interact and visualize with smart contract functions in a much simpler way.  Also depending smart contracts can using our base smart contracts to gain the advantage of having 'circuit-breaker' which will pause the activity if things go wrong in an unexpected way.",
-  "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
+  "name": "express-typescript-starter",
+  "version": "0.1.0",
+  "description": "A starting point for Node.js express apps with TypeScript",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/tharidu/EtherBeat.git"
+    "url": "https://github.com/sahat/hackathon-starter.git"
   },
-  "author": "",
-  "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/tharidu/EtherBeat/issues"
+  "author": "Bowden Kelly",
+  "license": "MIT",
+  "scripts": {
+    "start": "npm run build && npm run watch",
+    "build": "npm run build-ts && npm run tslint",
+    "serve": "node dist/server.js",
+    "watch": "concurrently -k -p \"[{name}]\" -n \"TypeScript,Node\" -c \"yellow.bold,cyan.bold,green.bold\" \"npm run watch-ts\" \"nodemon dist/server.js\"",
+    "test": "jest --forceExit",
+    "build-ts": "tsc",
+    "watch-ts": "tsc -w",
+    "tslint": "tslint -c tslint.json -p tsconfig.json"
   },
-  "homepage": "https://github.com/tharidu/EtherBeat#readme",
+  "jest": {
+    "globals": {
+      "__TS_CONFIG__": "tsconfig.json"
+    },
+    "moduleFileExtensions": [
+      "ts",
+      "js"
+    ],
+    "transform": {
+      "^.+\\.(ts|tsx)$": "./node_modules/ts-jest/preprocessor.js"
+    },
+    "testMatch": [
+      "**/test/**/*.test.(ts|js)"
+    ],
+    "testEnvironment": "node"
+  },
   "dependencies": {
-    "express": "^4.15.3",
-    "mocha": "^3.4.1",
+    "async": "^2.1.2",
+    "bcrypt-nodejs": "^0.0.3",
+    "body-parser": "^1.15.2",
+    "compression": "^1.6.2",
+    "dotenv": "^2.0.0",
+    "errorhandler": "^1.4.3",
+    "express": "^4.14.0",
+    "express-flash": "^0.0.2",
+    "express-session": "^1.14.2",
+    "express-validator": "^3.1.3",
+    "lodash": "^4.17.4",
+    "lusca": "^1.4.1",
+    "morgan": "^1.7.0",
+    "passport": "0.3.2",
+    "passport-local": "^1.0.0",
+    "request": "^2.78.0",
     "web3": "^0.19.0"
+  },
+  "devDependencies": {
+    "@types/async": "^2.0.40",
+    "@types/body-parser": "^1.16.2",
+    "@types/dotenv": "^2.0.20",
+    "@types/errorhandler": "0.0.30",
+    "@types/express": "^4.0.35",
+    "@types/express-session": "0.0.32",
+    "@types/jest": "^19.2.2",
+    "@types/jquery": "^2.0.41",
+    "@types/lodash": "^4.14.63",
+    "@types/morgan": "^1.7.32",
+    "@types/node": "^7.0.12",
+    "@types/passport": "^0.3.3",
+    "@types/request": "0.0.42",
+    "@types/supertest": "^2.0.0",
+    "concurrently": "^3.4.0",
+    "jest": "^19.0.2",
+    "nodemon": "^1.11.0",
+    "shelljs": "^0.7.7",
+    "supertest": "^2.0.1",
+    "ts-jest": "^19.0.8",
+    "tslint": "^5.0.0",
+    "typescript": "^2.2.2"
   }
 }
