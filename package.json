@@ -55,6 +55,7 @@
   },
   "devDependencies": {
     "@types/async": "^2.0.40",
+    "@types/bignumber.js": "^4.0.2",
     "@types/body-parser": "^1.16.2",
     "@types/dotenv": "^2.0.20",
     "@types/errorhandler": "0.0.30",
