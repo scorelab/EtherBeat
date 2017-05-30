@@ -1,0 +1,29 @@
+type Query {
+    hello: String
+    contract (id: String!): String
+    transaction (id: String!): [Transaction]
+}
+
+type Contract {
+    id: String
+    balance: String
+    storage: String
+    code: String
+    abiInterface: String
+    transactions: [Transaction]
+}
+
+type Transaction {
+    hash: String
+    nonce: Float
+    blockHash: String
+    blockNumber: Int
+    transactionIndex: Int
+    from: String
+    to: String
+    value: String
+    gasPrice: Float
+    gas: Int
+    input: String
+    data: String
+}
