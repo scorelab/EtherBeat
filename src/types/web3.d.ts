@@ -7,7 +7,7 @@ declare class Web3 {
 
     static providers: typeof Web3.providerTypes;
 
-    currentProvider: Web3.Provider | null;
+    static currentProvider: Web3.Provider | null;
 
     version: {
         api: string;
