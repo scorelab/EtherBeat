@@ -1,6 +1,5 @@
 export = Web3;
 
-/*~ Write your module's methods and properties in this class */
 import * as BigNumber from 'bignumber.js';
 declare class Web3 {
     constructor(provider: Web3.Provider);
@@ -8,6 +7,14 @@ declare class Web3 {
     static providers: typeof Web3.providerTypes;
 
     static currentProvider: Web3.Provider | null;
+
+    currentProvider: {
+        sendAsync: any;
+        send: any;
+    }
+
+    // Temporary
+    _extend : any;
 
     version: {
         api: string;
@@ -62,7 +69,7 @@ declare class Web3 {
         getBalance(addressHexString: string, defaultBlock?: number | string, callback?: (error: any, result: BigNumber.BigNumber) => void): BigNumber.BigNumber;
         getStorageAt(addressHexString: string, position: number, defaultBlock?: number | string, callback?: (error: any, result: string) => void): string;
         getCode(addressHexString: string, defaultBlock?: number | string, callback?: (error: any, result: string) => void): string;
-        getBlock(blockHashOrNumber: string | number, callback?: (error: any, result: Web3.BlockObject) => void): Web3.BlockObject;
+        getBlock(blockHashOrNumber: string | number, returnTransactionObjects?: boolean, callback?: (error: any, result: Web3.BlockObject) => void): Web3.BlockObject;
         getBlockTransactionCount(hashStringOrBlockNumber: string | number, callback?: (error: any, result: number) => void): number;
         getUncle(blockHashStringOrNumber: string | number, uncleNumber: number, returnTransactionObjects?: boolean, callback?: (error: any, result: object) => void): object;
         getTransaction(transactionHash: string, callback?: (error: any, result: Web3.TransactionObject) => void): Web3.TransactionObject;
@@ -107,9 +114,8 @@ declare namespace Web3 {
         gasLimit: number;
         gasUsed: number;
         timestamp: number;
-        transactions: object[];
+        transactions: TransactionObject[];
         uncles: string[];
-
     }
 
     export interface TransactionObject {
@@ -125,7 +131,6 @@ declare namespace Web3 {
         gas?: number;
         input?: string;
         data?: string;
-
     }
 
     export interface AbiIOParameter {
