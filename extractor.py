@@ -45,18 +45,18 @@ def addressNodes(g, fromAddress, isFromContract, toAddress, isToContract, txId):
             g.V().hasId(txId).addE("to").to(g.V().hasId(toA[0].id)).toList()
 
 
-def decideOnAction(g, tx, edge, error):
+def decideOnAction(g, tx, txId, error):
     if tx['type'] == 'call':
-        addressNodes(g, tx['action']['from'], False, tx['action']['to'], True, edge[0].outV.id)
+        addressNodes(g, tx['action']['from'], False, tx['action']['to'], True, txId)
     elif tx['type'] == 'create':
         if error:
-            addressNodes(g, tx['action']['from'], False, None, False, edge[0].outV.id)
+            addressNodes(g, tx['action']['from'], False, None, False, txId)
         else:
-            addressNodes(g, tx['action']['from'], False, tx['result']['address'], True, edge[0].outV.id)
+            addressNodes(g, tx['action']['from'], False, tx['result']['address'], True, txId)
     elif tx['type'] == 'suicide':
-        addressNodes(g, tx['action']['address'], False, tx['action']['refundAddress'], False, edge[0].outV.id)
+        addressNodes(g, tx['action']['address'], False, tx['action']['refundAddress'], False, txId)
     else:
-        addressNodes(g, tx['action']['from'], False, tx['result']['address'], True, edge[0].outV.id)
+        addressNodes(g, tx['action']['from'], False, tx['result']['address'], True, txId)
 
 
 def parall(blockNumbers, loop):
@@ -91,8 +91,8 @@ def parall(blockNumbers, loop):
                     subtraces -= 1
                     temp = g.addV('intx').property('hash', tx['transactionHash']).property('type', tx['type'])
                     if error:
-                        temp.property('error', tx['error'])
-                    edge = g.V().hasId(prevTx.id).addE('internal').to(temp).toList()
+                        temp.property('error', True)
+                    edge = g.V().hasId(prevTx).addE('internal').to(temp).toList()
 
                 else:
                     temp = g.addV('tx').property('hash', tx['transactionHash']).property('type', tx['type'])
@@ -100,13 +100,13 @@ def parall(blockNumbers, loop):
                         temp.property('error', tx['error'])
                     edge = g.V().hasId(blockV.id).addE('include').to(temp).toList()
 
-                decideOnAction(g, tx, edge, error)
+                decideOnAction(g, tx, edge[0].inV.id, error)
 
                 if tx['subtraces'] > 0:
                     subtraces = tx['subtraces']
-                    prevTx = edge[0].outV
+                    prevTx = edge[0].inV.id
 
-                    # print("finished", blockNumber)
+                # print("finished", blockNumber)
 
 
 toBlock = web3.eth.blockNumber
@@ -121,6 +121,7 @@ loop3 = ioloop.IOLoop()
 loop4 = ioloop.IOLoop()
 
 chunks = numpy.array_split(numpy.array(ls), 4)
+# parall(numpy.array([12984]), loop1)
 worker1 = Thread(target=parall, args=(chunks[0], loop1))
 worker3 = Thread(target=parall, args=(chunks[1], loop3))
 worker2 = Thread(target=parall, args=(chunks[2], loop2))
