@@ -4,7 +4,8 @@ import * as graphql from "graphql";
 export let schema = graphql.buildSchema(`
 type Query {
     hello: String
-    contract (accountHash: String!): String
+    contractQ (accountHash: String!): String
+    contract (accountHash: String!, abiInterface: String): Contract
     transaction (accountHash: String!): String
 }
 
@@ -12,9 +13,12 @@ type Contract {
     id: String
     balance: String
     storage: String
+    address: String
     code: String
+    source: String
     abiInterface: String
-    transactions: [Transaction]
+    creator: String
+    transactions: String
 }
 
 type Transaction {
