@@ -1,1 +1,1 @@
-docker run -ti -p 8180:8180 -p 8545:8545 -p 30303:30303 -v ~/.local/share/io.parity.ethereum/docker/:/mnt/ ethcore/parity:beta --base-path /mnt/ --chain ropsten --reserved-peers /mnt/ropstenpeers.txt --reserved-only --jsonrpc-interface all --jsonrpc-hosts all
+docker run -ti -p 8180:8180 -p 8545:8545 -p 30303:30303 -v ~/.local/share/io.parity.ethereum/docker/:/mnt/ ethcore/parity:beta --base-path /mnt/ --chain ropsten --reserved-peers /mnt/ropstenpeers.txt --reserved-only --jsonrpc-interface all --jsonrpc-hosts all --tracing on
