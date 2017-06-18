@@ -19,7 +19,7 @@ export let root = {
     return new contracts.Account(accountHash);
   },
 
-  transaction: (id: string) => {
-    return "not implemented";
+  transaction: ({ hash }: { hash: string }) => {
+    return new contracts.Transaction(hash);
   },
 };

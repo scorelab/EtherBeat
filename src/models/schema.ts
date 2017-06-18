@@ -4,7 +4,7 @@ import * as graphql from "graphql";
 export let schema = graphql.buildSchema(`
 type Query {
     account (accountHash: String!, abiInterface: String): Account
-    transaction (accountHash: String!): String
+    transaction (hash: String!): Transaction
 }
 
 type Account {
