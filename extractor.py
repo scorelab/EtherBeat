@@ -1,13 +1,11 @@
-from web3 import Web3, KeepAliveRPCProvider, IPCProvider
-from gremlin_python.process.graph_traversal import __
+import time
+import numpy as np
+
+from threading import Thread
 from gremlin_python.driver.driver_remote_connection import DriverRemoteConnection
 from gremlin_python.structure.graph import Graph
-
-import time
-import numpy
-from threading import Thread
 from tornado import ioloop
-from multiprocessing.dummy import Pool as ThreadPool
+from web3 import Web3, KeepAliveRPCProvider
 
 web3 = Web3(KeepAliveRPCProvider(host='localhost', port='8545'))
 
@@ -15,18 +13,11 @@ gremlin_connection = 'ws://localhost:8182/gremlin'
 traversal_source = 'g'
 
 
-# g = Graph().traversal().withRemote(DriverRemoteConnection(gremlin_connection, traversal_source))
-
-
-# tr = web3.eth.getTransaction("0x74dbf22a0eddde8f94f09c3d56aaac2ae2de896a7aa5f95f1257c012f269ce92")
-# sss = web3._requestManager.request_blocking("trace_block", [web3.fromDecimal(11)])
-# ds = web3.fromDecimal(11)
-
 # block -> transactions -> internal transactions (sequential)
 # type - call , create , suicide
-# error ?
+# error
 
-def addressNodes(g, fromAddress, isFromContract, toAddress, isToContract, txId):
+def address_nodes(g, fromAddress, isFromContract, toAddress, isToContract, txId):
     frA = g.V().hasLabel("account").has('addr', fromAddress).toList()
 
     if len(frA) == 0:
@@ -45,18 +36,18 @@ def addressNodes(g, fromAddress, isFromContract, toAddress, isToContract, txId):
             g.V().hasId(txId).addE("to").to(g.V().hasId(toA[0].id)).toList()
 
 
-def decideOnAction(g, tx, txId, error):
+def decide_on_action(g, tx, txId, error):
     if tx['type'] == 'call':
-        addressNodes(g, tx['action']['from'], False, tx['action']['to'], True, txId)
+        address_nodes(g, tx['action']['from'], False, tx['action']['to'], True, txId)
     elif tx['type'] == 'create':
         if error:
-            addressNodes(g, tx['action']['from'], False, None, False, txId)
+            address_nodes(g, tx['action']['from'], False, None, False, txId)
         else:
-            addressNodes(g, tx['action']['from'], False, tx['result']['address'], True, txId)
+            address_nodes(g, tx['action']['from'], False, tx['result']['address'], True, txId)
     elif tx['type'] == 'suicide':
-        addressNodes(g, tx['action']['address'], False, tx['action']['refundAddress'], False, txId)
+        address_nodes(g, tx['action']['address'], False, tx['action']['refundAddress'], False, txId)
     else:
-        addressNodes(g, tx['action']['from'], False, tx['result']['address'], True, txId)
+        address_nodes(g, tx['action']['from'], False, tx['result']['address'], True, txId)
 
 
 def parall(blockNumbers, loop):
@@ -66,17 +57,16 @@ def parall(blockNumbers, loop):
         # blockE = web3.eth.getBlock(blockNumber, True)
         block = web3._requestManager.request_blocking("trace_block", [web3.fromDecimal(blockNumber)])
 
-        first = True
         count = len(block)
-        blockV = None
         if count > 0:
-            # print(blockNumber)
-            if first:
+            blockEx = g.V().hasLabel("block").has('number', blockNumber).toList()
+
+            if len(blockEx) == 0:
                 blockV = g.addV('block').property('number', blockNumber).next()
-                first = False
+            else:
+                blockV = blockEx[0]
 
             # Add transactions
-
             subtraces = 0
             prevTx = None
             for index in range(len(block)):
@@ -87,6 +77,7 @@ def parall(blockNumbers, loop):
                 else:
                     error = False
 
+                # Internal transaction
                 if subtraces > 0:
                     subtraces -= 1
                     temp = g.addV('intx').property('hash', tx['transactionHash']).property('type', tx['type'])
@@ -100,18 +91,18 @@ def parall(blockNumbers, loop):
                         temp.property('error', tx['error'])
                     edge = g.V().hasId(blockV.id).addE('include').to(temp).toList()
 
-                decideOnAction(g, tx, edge[0].inV.id, error)
+                decide_on_action(g, tx, edge[0].inV.id, error)
 
                 if tx['subtraces'] > 0:
                     subtraces = tx['subtraces']
                     prevTx = edge[0].inV.id
 
-                # print("finished", blockNumber)
+                    # print("finished", blockNumber)
 
 
 toBlock = web3.eth.blockNumber
 toBlock = 50000
-ls = range(toBlock)
+chunks = np.array_split(np.array(range(toBlock)), 4)
 
 start = time.time()
 
@@ -120,8 +111,7 @@ loop2 = ioloop.IOLoop()
 loop3 = ioloop.IOLoop()
 loop4 = ioloop.IOLoop()
 
-chunks = numpy.array_split(numpy.array(ls), 4)
-# parall(numpy.array([12984]), loop1)
+# parall(numpy.array([12994]), loop1)
 worker1 = Thread(target=parall, args=(chunks[0], loop1))
 worker3 = Thread(target=parall, args=(chunks[1], loop3))
 worker2 = Thread(target=parall, args=(chunks[2], loop2))
@@ -136,11 +126,6 @@ worker1.join()
 worker2.join()
 worker3.join()
 worker4.join()
-# pool = ThreadPool(4)
-# pool.map(parall, range(toBlock))
-#
-# pool.close()
-# pool.join()
 
 end = time.time()
 print(end - start, "seconds elapsed")

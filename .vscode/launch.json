@@ -7,17 +7,6 @@
         {
             "type": "node",
             "request": "launch",
-            "name": "Launch Program",
-            "program": "${workspaceRoot}/dist/graph.js",
-            "smartStep": true,
-            "outFiles": [
-                "../dist/**/*.js"
-            ],
-            "protocol": "inspector"
-        },
-        {
-            "type": "node",
-            "request": "launch",
             "name": "Debug",
             "program": "${workspaceRoot}/dist/server.js",
             "smartStep": true,
