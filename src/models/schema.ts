@@ -3,22 +3,20 @@ import * as graphql from "graphql";
 // Construct a schema, using GraphQL schema language
 export let schema = graphql.buildSchema(`
 type Query {
-    hello: String
-    contractQ (accountHash: String!): String
-    contract (accountHash: String!, abiInterface: String): Contract
+    account (accountHash: String!, abiInterface: String): Account
     transaction (accountHash: String!): String
 }
 
-type Contract {
+type Account {
     id: String
-    balance: String
+    balance: String!
     storage: String
-    address: String
+    address: String!
     code: String
     source: String
     abiInterface: String
     creator: String
-    transactions: String
+    transactions: [Transaction]
 }
 
 type Transaction {
@@ -27,10 +25,10 @@ type Transaction {
     blockHash: String
     blockNumber: Int
     transactionIndex: Int
-    from: String
-    to: String
+    from: Account
+    to: Account
     value: String
-    gasPrice: Float
+    gasPrice: String
     gas: Int
     input: String
     data: String

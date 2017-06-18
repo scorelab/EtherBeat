@@ -13,34 +13,10 @@ if (web3 !== undefined) {
   web3 = new Web3(new Web3.providers.HttpProvider("http://localhost:8545"));
 }
 
-// web3._extend({
-//   property: 'eth',
-//   methods: [new web3._extend.Method({
-//     name: 'trace_block',
-//     call: 'trace_block',
-//     params: 1,
-//     inputFormatter: 0
-//   })]
-// });
-
-// ress = web3.trace_block("0x2ed119");
-
-
 // The root provides a resolver function for each API endpoint
 export let root = {
-  hello: () => {
-    return "Hello world!";
-  },
-
-  contract: ({ accountHash }: { accountHash: string }) => {
-    return new contracts.Contract(accountHash);
-    // const balance = web3.eth.getBalance(accountHash);
-    // return balance.toString(10);
-  },
-
-  contractQ: ({ accountHash }: { accountHash: string }) => {
-    const balance = web3.eth.getBalance(accountHash);
-    return balance.toString(10);
+  account: ({ accountHash }: { accountHash: string }) => {
+    return new contracts.Account(accountHash);
   },
 
   transaction: (id: string) => {
