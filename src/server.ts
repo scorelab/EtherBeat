@@ -11,7 +11,9 @@ import * as lusca from "lusca";
 import * as dotenv from "dotenv";
 import * as flash from "express-flash";
 import * as path from "path";
+import * as graphqlHTTP from "express-graphql";
 // import * as passport from "passport";
+
 import expressValidator = require("express-validator");
 
 
@@ -26,6 +28,16 @@ dotenv.config({ path: ".env.example" });
  */
 import * as homeController from "./controllers/home";
 import * as apiController from "./controllers/api";
+
+/**
+ * Models
+ */
+import * as models from "./models/schema";
+
+/**
+ * GraphQL resolvers
+ */
+import * as resolvers from "./resolvers/root";
 
 /**
  * API keys and Passport configuration.
@@ -66,6 +78,15 @@ app.get("/", homeController.index);
  * API examples routes.
  */
 app.get("/api", apiController.getApi);
+
+/**
+ * GraphQL endpoint
+ */
+app.use("/graphql", graphqlHTTP({
+  schema: models.schema,
+  rootValue: resolvers.root,
+  graphiql: true,
+}));
 
 /**
  * Error Handler. Provides full stack - remove for production
