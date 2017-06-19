@@ -16,7 +16,7 @@ type Account {
     source: String
     abiInterface: String
     creator: String
-    transactions: [Transaction]
+    transactions (page: Int = 1, size: Int = 10): [Transaction]
 }
 
 type Transaction {
