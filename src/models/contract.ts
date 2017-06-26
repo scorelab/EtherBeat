@@ -53,8 +53,8 @@ export class Account {
             });
     }
 
-    transactions() {
-        return tt`g.V().hasLabel('account').has('addr', ${this.address}).both().hasLabel('tx').values('hash')`
+    transactions({ page, size }: { page: number, size: number }) {
+        return tt`g.V().hasLabel('account').has('addr', ${this.address}).both().hasLabel('tx').range(${(page - 1) * size}, ${page * size}).values('hash')`
             .then((results: string[]) => {
                 const lss: Transaction[] = [];
 
