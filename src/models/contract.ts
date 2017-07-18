@@ -1,15 +1,7 @@
 import * as Web3 from "web3";
 import * as gremlin from "gremlin";
-
-let web3: Web3;
-export default web3;
-
-if (web3 !== undefined) {
-    web3 = new Web3(Web3.currentProvider);
-} else {
-    // TODO - move to configuration
-    web3 = new Web3(new Web3.providers.HttpProvider("http://localhost:8545"));
-}
+import web3 from "../config/web3conn";
+import * as incercepts from "../abi/intercept";
 
 const client = gremlin.createClient();
 const tt = gremlin.makeTemplateTag(client);
