@@ -61,6 +61,12 @@ export class Account {
                 // TODO Something went wrong
             });
     }
+
+    parameters({ jsonAbi }: { jsonAbi: string }) {
+        // https://ropsten.etherscan.io/address/0xf7d93bcb8e4372f46383ecee82f9adf1aa397ba9#readContract
+        const ab = new incercepts.AbiContract(this.address, jsonAbi);
+        return JSON.stringify(ab.getContractProperties());
+    }
 }
 
 export class Transaction {

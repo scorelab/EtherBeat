@@ -27,8 +27,11 @@ export class AbiContract {
         });
 
         prps.forEach(func => {
-            console.log(func);
-            results.push({ function: func.name, type: func.outputs, result: this.contractInstance[func.name]() });
+            try {
+                results.push({ function: func.name, type: func.outputs, result: this.contractInstance[func.name]() });
+            } catch (error) {
+                // Ignore
+            }
         });
 
         return results;
