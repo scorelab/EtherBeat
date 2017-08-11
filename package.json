@@ -72,6 +72,7 @@
     "@types/morgan": "^1.7.32",
     "@types/node": "^7.0.12",
     "@types/passport": "^0.3.3",
+    "@types/passport-github": "^1.1.1",
     "@types/request": "0.0.42",
     "@types/supertest": "^2.0.0",
     "concurrently": "^3.4.0",
