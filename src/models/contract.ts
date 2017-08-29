@@ -1,15 +1,7 @@
 import * as Web3 from "web3";
 import * as gremlin from "gremlin";
-
-let web3: Web3;
-export default web3;
-
-if (web3 !== undefined) {
-    web3 = new Web3(Web3.currentProvider);
-} else {
-    // TODO - move to configuration
-    web3 = new Web3(new Web3.providers.HttpProvider("http://localhost:8545"));
-}
+import web3 from "../config/web3conn";
+import * as incercepts from "../abi/intercept";
 
 const client = gremlin.createClient();
 const tt = gremlin.makeTemplateTag(client);
@@ -68,6 +60,12 @@ export class Account {
                 console.log(err);
                 // TODO Something went wrong
             });
+    }
+
+    parameters({ jsonAbi }: { jsonAbi: string }) {
+        // https://ropsten.etherscan.io/address/0xf7d93bcb8e4372f46383ecee82f9adf1aa397ba9#readContract
+        const ab = new incercepts.AbiContract(this.address, jsonAbi);
+        return JSON.stringify(ab.getContractProperties());
     }
 }
 

@@ -17,6 +17,7 @@ type Account {
     abiInterface: String
     creator: String
     transactions (page: Int = 1, size: Int = 10): [Transaction]
+    parameters (jsonAbi: String!): String
 }
 
 type Transaction {
