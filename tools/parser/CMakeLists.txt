@@ -15,7 +15,7 @@ if(NOT ${IS_LIBRARY})
   file(GLOB SOURCES "src/*.cpp")
 
   add_executable(${PROJECT_NAME} ${SOURCES})
-  target_link_libraries (${PROJECT_NAME} jsoncpp jsonrpccpp-common jsonrpccpp-client ${BASE_LIBS})
+  target_link_libraries (${PROJECT_NAME} leveldb ${BASE_LIBS})
 endif()
 
 # Build shared library for python
@@ -34,7 +34,7 @@ if(${IS_LIBRARY})
 
   # Build and link the module
   add_library(${PROJECT_NAME} SHARED ${SOURCES})
-  target_link_libraries(${PROJECT_NAME} jsoncpp jsonrpccpp-common jsonrpccpp-client ${BASE_LIBS} ${Boost_LIBRARIES} ${PYTHON_LIBRARIES})
+  target_link_libraries(${PROJECT_NAME} leveldb ${BASE_LIBS} ${Boost_LIBRARIES} ${PYTHON_LIBRARIES})
   add_dependencies(${PROJECT_NAME} Boost)
 
   # Tweaks the name of the library to match what Python expects
