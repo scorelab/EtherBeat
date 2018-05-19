@@ -14,8 +14,8 @@ std::string hexStr(unsigned char *data, int len)
   return s;
 }
 
-void print_bytes (std::string val){
-    printf("Bytes : [");
+void print_bytes (std::string val, std::string heading="Bytes"){
+    printf("%s : [", heading.c_str());
     for(char& c : val) {
             uint8_t byteval = c;
             printf("%d ", byteval);
@@ -30,6 +30,25 @@ int hexStringToInt(std::string hexString){
     ss >> x;
     return x;
 }
+
+int bytesVectorToInt(std::vector<uint8_t> bytes_arr) {
+    int dest = 0;
+    for (unsigned i = 0; i < bytes_arr.size(); ++i) {
+        dest *= 256;
+        dest += bytes_arr[i];
+    }
+    return dest;
+}
+
+std::vector<uint8_t> getByteVector(std::string byteString){
+    std::vector<uint8_t> contents;
+    int i;
+    for(i=0; i<byteString.length(); i++) {
+        contents.insert(contents.end(), (uint8_t)byteString[i]);
+    }
+    return contents;
+}
+
 
 std::string getKeyString(uint64_t blockNumber, uint8_t prefix[], uint8_t suffix[], int prefixSize = 1, int suffixSize = 1){
 

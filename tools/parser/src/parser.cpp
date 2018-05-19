@@ -17,57 +17,67 @@ Block Parser::getBlock(uint64_t blockNumber) {
     // get the value from leveldb
     leveldb::Status shk = db->Get(leveldb::ReadOptions(), hashKey, &value);
 
-    print_bytes(hashKey);
     if (shk.ok()) {
-        std::cout << "-------- Hash Key Found --------" <<std::endl;
-        print_bytes(value);
-        printf("Hex (%d): %s \n", value.length(), hexStr((unsigned char *)&value[0], value.length()).c_str());
 
         // to get bytes array of a string => (uint8_t *)&string[0]
         std::string headerKey = getKeyString(blockNumber, headerPrefix, (uint8_t *)&value[0], 1, 32);
-        print_bytes(headerKey);
 
 
         std::string blockHeaderData;
         leveldb::Status sbhd = db->Get(leveldb::ReadOptions(), headerKey, &blockHeaderData);
 
         if (sbhd.ok()){
-            std::cout << "-------- Block Header Data Found --------" << std::endl;
-            print_bytes(blockHeaderData);
-            printf("Hex (%d): %s \n", blockHeaderData.length(), hexStr((unsigned char *)&blockHeaderData[0], blockHeaderData.length()).c_str());
 
-            std::vector<uint8_t> _contents;
-            int i;
-            for(i=0; i<blockHeaderData.length(); i++) {
-                // printf("%d ", (uint8_t)blockHeaderData[i]);
-                _contents.insert(_contents.end(), (uint8_t)blockHeaderData[i]);
-                // _contents.insert(_contents.end(), (uint8_t)249);
-            }
+            std::vector<uint8_t> contents;
+            contents = getByteVector(blockHeaderData);
 
-            RLP rlp{_contents};
-            printf("(%d) RLP Items %d\n", i, rlp.numItems());
+            RLP rlp{contents};
+            // printf("RLP Items %d\n", rlp.numItems());
 
-            printf("Item : %d, size : %d\n", rlp[0].dataOffset(), rlp[0].dataLength());
-            printf("Item : %d, size : %d\n", rlp[1].dataOffset(), rlp[1].dataLength());
-            printf("Item : %d, size : %d\n", rlp[2].dataOffset(), rlp[2].dataLength());
-            printf("Item : %d, size : %d\n", rlp[3].dataOffset(), rlp[3].dataLength());
-            printf("Item : %d, size : %d\n", rlp[4].dataOffset(), rlp[4].dataLength());
-            printf("Item : %d, size : %d\n", rlp[5].dataOffset(), rlp[5].dataLength());
-            printf("Item : %d, size : %d\n", rlp[6].dataOffset(), rlp[6].dataLength());
-            printf("Item : %d, size : %d\n", rlp[7].dataOffset(), rlp[7].dataLength());
-            printf("Item : %d, size : %d\n", rlp[8].dataOffset(), rlp[8].dataLength());
-            printf("Item : %d, size : %d\n", rlp[9].dataOffset(), rlp[9].dataLength());
-            printf("Item : %d, size : %d\n", rlp[10].dataOffset(), rlp[10].dataLength());
-            printf("Item : %d, size : %d\n", rlp[11].dataOffset(), rlp[11].dataLength());
-            printf("Item : %d, size : %d\n", rlp[12].dataOffset(), rlp[12].dataLength());
-            printf("Item : %d, size : %d\n", rlp[13].dataOffset(), rlp[13].dataLength());
-            printf("Item : %d, size : %d\n", rlp[14].dataOffset(), rlp[14].dataLength());
+            Header h;
+            h = createHeader(contents, rlp);
+            Block b(h);
+            return b;
         }
+
+
 
     }else {
         std::cout << "key not found" << std::endl;
     }
-    // get the block from leveldb
-    Block b;
-    return b;
+
+    throw;
 }
+
+Header Parser::createHeader(std::vector<uint8_t> contents, RLP & rlp)
+{
+    Header header;
+
+    header.parentHash = createByteVector(contents, rlp[0]);
+    header.sha3Uncles = createByteVector(contents, rlp[1]);
+    header.beneficiary = createByteVector(contents, rlp[2]);
+    header.stateRoot = createByteVector(contents, rlp[3]);
+    header.transactionsRoot = createByteVector(contents, rlp[4]);
+    header.receiptsRoot = createByteVector(contents, rlp[5]);
+    header.logsBloom = createByteVector(contents, rlp[6]);
+    header.difficulty = createByteVector(contents, rlp[7]);
+    header.number = createByteVector(contents, rlp[8]);
+    header.gasLimit = createByteVector(contents, rlp[9]);
+    header.gasUsed = createByteVector(contents, rlp[10]);
+    header.timestamp = createByteVector(contents, rlp[11]);
+    header.extraData = createByteVector(contents, rlp[12]);
+    header.mixHash = createByteVector(contents, rlp[13]);
+    header.nonce = createByteVector(contents, rlp[14]);
+
+    header.print();
+
+	return header;
+}
+
+std::vector<uint8_t> Parser::createByteVector(std::vector<uint8_t> contents, const RLP & rlp) {
+    std::vector<uint8_t>::const_iterator first = contents.begin() + rlp.dataOffset();
+    std::vector<uint8_t>::const_iterator last = contents.begin() + rlp.dataOffset() + rlp.dataLength();
+    std::vector<uint8_t> newVec(first, last);
+    return newVec;
+}
+
