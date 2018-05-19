@@ -1,3 +1,5 @@
+// Sample file to compile a python library
+/*
 #include <boost/python.hpp>
 #include "Blockchain.h"
 
@@ -30,3 +32,4 @@ BOOST_PYTHON_MODULE(ethersci)
       .def("getBlock", getBlock_hash)
       .def("size", &Blockchain::size);
 }
+*/
