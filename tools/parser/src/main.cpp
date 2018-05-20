@@ -18,7 +18,9 @@ int main(int argc, const char *argv[]) {
 
     Parser parser(db);
 
-    parser.getBlock(40);
+    Block b = parser.getBlock(2267598);
+    b.print();
+    // parser.getBlock(40);
 
     delete db;
     return 1;

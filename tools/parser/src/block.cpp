@@ -4,10 +4,10 @@
 #include <string>
 
 void Header::print() {
-    printf("---------- Block Header : %d ----------\n", bytesVectorToInt(number));
+    // printf("---------- Block Header : %d ----------\n", bytesVectorToInt(number));
     printf("parentHash: %s \n",  hexStr((unsigned char *)&parentHash[0], parentHash.size()).c_str());
-    printf("sha3Uncles: %s \n",  hexStr((unsigned char *)&sha3Uncles[0], sha3Uncles.size()).c_str());
-    printf("beneficiary: %s \n",  hexStr((unsigned char *)&beneficiary[0], beneficiary.size()).c_str());
+    printf("sha3Uncles (ommersHash): %s \n",  hexStr((unsigned char *)&sha3Uncles[0], sha3Uncles.size()).c_str());
+    printf("beneficiary (miner) : %s \n",  hexStr((unsigned char *)&beneficiary[0], beneficiary.size()).c_str());
     printf("stateRoot: %s \n",  hexStr((unsigned char *)&stateRoot[0], stateRoot.size()).c_str());
     printf("transactionsRoot: %s \n",  hexStr((unsigned char *)&transactionsRoot[0], transactionsRoot.size()).c_str());
     printf("receiptsRoot: %s \n",  hexStr((unsigned char *)&receiptsRoot[0], receiptsRoot.size()).c_str());
@@ -24,3 +24,8 @@ void Header::print() {
 
 }
 Block::Block(Header header):header(header) {}
+void Block::print() {
+    printf("---------- Block : %d ----------\n", bytesVectorToInt(header.number));
+    printf("hash: %s \n",  hexStr((unsigned char *)&hash[0], hash.size()).c_str());
+    header.print();
+}
