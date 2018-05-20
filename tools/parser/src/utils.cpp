@@ -4,6 +4,8 @@
 constexpr char hexmap[] = {'0', '1', '2', '3', '4', '5', '6', '7',
                            '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'};
 
+
+// Returns Hex String for a given byte character location
 std::string hexStr(unsigned char *data, int len)
 {
   std::string s(len * 2, ' ');
@@ -14,11 +16,21 @@ std::string hexStr(unsigned char *data, int len)
   return s;
 }
 
+// Print bytes for a given byte string
 void print_bytes (std::string val, std::string heading="Bytes"){
     printf("%s : [", heading.c_str());
     for(char& c : val) {
             uint8_t byteval = c;
             printf("%d ", byteval);
+    }
+    printf("]\n\n");
+}
+
+// Print bytes for a given byte vector
+void print_bytes (std::vector<uint8_t> val, std::string heading="Bytes"){
+    printf("%s : [", heading.c_str());
+    for(uint8_t c : val) {
+            printf("%d ", c);
     }
     printf("]\n\n");
 }
