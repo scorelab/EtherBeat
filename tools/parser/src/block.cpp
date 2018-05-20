@@ -23,9 +23,30 @@ void Header::print() {
     printf("nonce: %s \n",  hexStr((unsigned char *)&nonce[0], nonce.size()).c_str());
 
 }
+
+void Transaction::print() {
+    printf("nonce: %d \n",  bytesVectorToInt(nonce));
+    printf("gasPrice (too large int): %s\n", hexStr((unsigned char *)&gasPrice[0], gasPrice.size()).c_str());
+    printf("gasLimit: %d \n",  bytesVectorToInt(gasLimit));
+    printf("to: %s \n",  hexStr((unsigned char *)&to[0], to.size()).c_str());
+    printf("value: %s \n",  hexStr((unsigned char *)&value[0], value.size()).c_str());
+    printf("v: %s \n",  hexStr((unsigned char *)&v[0], v.size()).c_str());
+    printf("r: %s \n",  hexStr((unsigned char *)&r[0], r.size()).c_str());
+    printf("s: %s \n",  hexStr((unsigned char *)&s[0], s.size()).c_str());
+    printf("init: %s \n",  hexStr((unsigned char *)&init[0], init.size()).c_str());
+    printf("\n \n");
+}
+
+
 Block::Block(Header header):header(header) {}
 void Block::print() {
     printf("---------- Block : %d ----------\n", bytesVectorToInt(header.number));
     printf("hash: %s \n",  hexStr((unsigned char *)&hash[0], hash.size()).c_str());
     header.print();
+    printf("----Transactions------\n");
+    for(Transaction t : transactions){
+        t.print();
+    }
 }
+
+

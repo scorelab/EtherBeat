@@ -43,8 +43,8 @@ int hexStringToInt(std::string hexString){
     return x;
 }
 
-int bytesVectorToInt(std::vector<uint8_t> bytes_arr) {
-    int dest = 0;
+size_t bytesVectorToInt(std::vector<uint8_t> bytes_arr) {
+    size_t dest = 0;
     for (unsigned i = 0; i < bytes_arr.size(); ++i) {
         dest *= 256;
         dest += bytes_arr[i];
