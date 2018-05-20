@@ -6,6 +6,8 @@
 class Parser {
 
     leveldb::DB * db;
+    uint8_t headerPrefix[1] = {104};
+    uint8_t numSuffix[1] = {110};
 
     public:
         Parser(leveldb::DB *);
@@ -13,5 +15,6 @@ class Parser {
     private:
         Header createHeader(std::vector<uint8_t> content, RLP & rlp);
         std::vector<uint8_t> createByteVector(std::vector<uint8_t> contents, const RLP & rlp);
+        std::string createHeaderKey(int blockNumber, std::string blockHash);
 
 };

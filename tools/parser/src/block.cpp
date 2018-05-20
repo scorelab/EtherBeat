@@ -4,7 +4,7 @@
 #include <string>
 
 void Header::print() {
-    printf("---------- Block Header : %d ----------\n", bytesVectorToInt(number));
+    // printf("---------- Block Header : %d ----------\n", bytesVectorToInt(number));
     printf("parentHash: %s \n",  hexStr((unsigned char *)&parentHash[0], parentHash.size()).c_str());
     printf("sha3Uncles (ommersHash): %s \n",  hexStr((unsigned char *)&sha3Uncles[0], sha3Uncles.size()).c_str());
     printf("beneficiary (miner) : %s \n",  hexStr((unsigned char *)&beneficiary[0], beneficiary.size()).c_str());
@@ -24,3 +24,8 @@ void Header::print() {
 
 }
 Block::Block(Header header):header(header) {}
+void Block::print() {
+    printf("---------- Block : %d ----------\n", bytesVectorToInt(header.number));
+    printf("hash: %s \n",  hexStr((unsigned char *)&hash[0], hash.size()).c_str());
+    header.print();
+}

@@ -26,7 +26,9 @@ public:
 class Block {
     Header header;
     public:
+        std::vector<uint8_t> hash;
         Block(Header header);
+        void print();
 
 };
 
