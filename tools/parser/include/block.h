@@ -42,6 +42,7 @@ class Block {
     public:
         std::vector<uint8_t> hash;
         std::vector<Transaction> transactions;
+        std::vector<std::vector<uint8_t>> ommerHashes;
         Block(Header header);
         void print();
 

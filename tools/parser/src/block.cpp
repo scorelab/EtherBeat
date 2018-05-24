@@ -47,6 +47,10 @@ void Block::print() {
     for(Transaction t : transactions){
         t.print();
     }
+
+    for(std::vector<uint8_t> ommerHash: ommerHashes){
+        printf("ommer hash: %s \n",  hexStr((unsigned char *)&ommerHash[0], ommerHash.size()).c_str());
+    }
 }
 
 

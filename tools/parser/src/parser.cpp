@@ -53,7 +53,6 @@ Block Parser::getBlock(uint64_t blockNumber) {
                 RLP rlp_body{body_content};
                 updateBody(&block, body_content, rlp_body);
 
-                printf("RLP Items %d\n", rlp_body[1].numItems());
             }else{
                 printf("\n Body Not Found \n");
             }
@@ -102,8 +101,9 @@ void Parser::updateHeader(Header *header, std::vector<uint8_t> contents, RLP & r
 }
 
 void Parser::updateBody(Block *block, std::vector<uint8_t> contents, RLP & rlp){
-    if (rlp.numItems() > 0) {
+    if (rlp.numItems() > 1) {
         int i;
+        // get transactions
         for(i=0; i<rlp[0].numItems(); i++) {
             // todo : check if transaction contains valid number of fields
             Transaction transaction;
@@ -111,15 +111,28 @@ void Parser::updateBody(Block *block, std::vector<uint8_t> contents, RLP & rlp){
             transaction.nonce = createByteVector(contents, rlp[0][i][0]);
             transaction.gasPrice = createByteVector(contents, rlp[0][i][1]);
             transaction.gasLimit = createByteVector(contents, rlp[0][i][2]);
-            transaction.to = createByteVector(contents, rlp[0][i][3]);
+            transaction.to = createByteVector(contents, rlp[0][i][3]); // empty for contract creation
             transaction.value = createByteVector(contents, rlp[0][i][4]);
             transaction.v = createByteVector(contents, rlp[0][i][5]);
             transaction.r = createByteVector(contents, rlp[0][i][6]);
             transaction.s = createByteVector(contents, rlp[0][i][7]);
+
             transaction.init = createByteVector(contents, rlp[0][i][8]);
-            /*transaction.data = createByteVector(contents, rlp[0][i][9]);*/
+
+            // todo : create from field using txHash, v, r, s values
             block->transactions.insert(block->transactions.end(), transaction);
+
         }
+
+        // todo : check below code after a full node.
+        // get ommers
+        std::vector<std::vector<uint8_t>> ommerHashes;
+
+        for(i=0; i<rlp[1].numItems(); i++) {
+            std::vector<uint8_t> ommerHash = createByteVector(contents, rlp[1][i]);
+            ommerHashes.insert(ommerHashes.end(), ommerHash);
+        }
+        block->ommerHashes = ommerHashes;
     }
 
 }
