@@ -24,6 +24,7 @@ class Header {
 //Transaction
 class Transaction {
     public:
+        std::vector<std::uint8_t> raw_tx;
         std::vector<std::uint8_t> nonce;
     	std::vector<std::uint8_t> gasPrice;
     	std::vector<std::uint8_t> gasLimit;
@@ -33,7 +34,11 @@ class Transaction {
     	std::vector<std::uint8_t> r;
     	std::vector<std::uint8_t> s;
     	std::vector<std::uint8_t> init; // data
+
+    	std::vector<std::uint8_t> from;
+
     	void print();
+    	std::vector<std::uint8_t> recoverTxSender();
 };
 
 // Block

@@ -107,17 +107,19 @@ void Parser::updateBody(Block *block, std::vector<uint8_t> contents, RLP & rlp){
         for(i=0; i<rlp[0].numItems(); i++) {
             // todo : check if transaction contains valid number of fields
             Transaction transaction;
-
+            transaction.raw_tx = createByteVector(contents, rlp[0][i]);
             transaction.nonce = createByteVector(contents, rlp[0][i][0]);
             transaction.gasPrice = createByteVector(contents, rlp[0][i][1]);
             transaction.gasLimit = createByteVector(contents, rlp[0][i][2]);
             transaction.to = createByteVector(contents, rlp[0][i][3]); // empty for contract creation
             transaction.value = createByteVector(contents, rlp[0][i][4]);
-            transaction.v = createByteVector(contents, rlp[0][i][5]);
-            transaction.r = createByteVector(contents, rlp[0][i][6]);
-            transaction.s = createByteVector(contents, rlp[0][i][7]);
+            transaction.init = createByteVector(contents, rlp[0][i][5]);
 
-            transaction.init = createByteVector(contents, rlp[0][i][8]);
+            transaction.v = createByteVector(contents, rlp[0][i][6]);
+            transaction.r = createByteVector(contents, rlp[0][i][7]);
+            transaction.s = createByteVector(contents, rlp[0][i][8]);
+
+            transaction.from = transaction.recoverTxSender();
 
             // todo : create from field using txHash, v, r, s values
             block->transactions.insert(block->transactions.end(), transaction);

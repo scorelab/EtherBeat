@@ -15,7 +15,7 @@ if(NOT ${IS_LIBRARY})
   file(GLOB SOURCES "src/*.cpp")
 
   add_executable(${PROJECT_NAME} ${SOURCES})
-  target_link_libraries (${PROJECT_NAME} leveldb ${BASE_LIBS})
+  target_link_libraries (${PROJECT_NAME} leveldb cryptopp secp256k1 ${BASE_LIBS})
 endif()
 
 # Build shared library for python

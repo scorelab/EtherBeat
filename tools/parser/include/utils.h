@@ -6,4 +6,8 @@ int hexStringToInt(std::string);
 int bytesVectorToInt(std::vector<uint8_t> bytes_arr);
 std::vector<uint8_t> getByteVector(std::string byteString);
 
+std::vector<uint8_t> sha3(std::vector<uint8_t > &input, int digestSize);
+std::vector<uint8_t> keccak_256(std::vector<uint8_t > &input);
+
+
 
