@@ -6,15 +6,21 @@
 class Parser {
 
     leveldb::DB * db;
-    uint8_t headerPrefix[1] = {104};
-    uint8_t numSuffix[1] = {110};
+    uint8_t headerPrefix[1] = {104}; //h
+    uint8_t numSuffix[1] = {110}; //n
+
+    uint8_t bodyPrefix[1] = {98}; //b
 
     public:
         Parser(leveldb::DB *);
         Block getBlock(uint64_t);
     private:
-        Header createHeader(std::vector<uint8_t> content, RLP & rlp);
+        void updateHeader(Header *header, std::vector<uint8_t> contents, RLP & rlp);
+        void updateBody(Block *block, std::vector<uint8_t> contents, RLP & rlp);
+
         std::vector<uint8_t> createByteVector(std::vector<uint8_t> contents, const RLP & rlp);
-        std::string createHeaderKey(int blockNumber, std::string blockHash);
+        std::string createBlockHeaderKey(int blockNumber, std::string blockHash);
+
+        std::string createBlockBodyKey(int blockNumber, std::string blockHash);
 
 };

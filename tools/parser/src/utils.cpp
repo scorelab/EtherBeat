@@ -1,5 +1,6 @@
 #include <sstream>
 #include <vector>
+#include <cryptopp/keccak.h>
 
 constexpr char hexmap[] = {'0', '1', '2', '3', '4', '5', '6', '7',
                            '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'};
@@ -43,8 +44,8 @@ int hexStringToInt(std::string hexString){
     return x;
 }
 
-int bytesVectorToInt(std::vector<uint8_t> bytes_arr) {
-    int dest = 0;
+size_t bytesVectorToInt(std::vector<uint8_t> bytes_arr) {
+    size_t dest = 0;
     for (unsigned i = 0; i < bytes_arr.size(); ++i) {
         dest *= 256;
         dest += bytes_arr[i];
@@ -85,6 +86,10 @@ std::string getKeyString(uint64_t blockNumber, uint8_t prefix[], uint8_t suffix[
         hexval.insert(hexval.end(), c);
     }
 
+    // Example append prefix 'h' and suffix 'n' to the hexval bytes
+    // hexval.insert(hexval.begin(), 104); // hex = 68 0 0 0 0 0 0 0 28
+    // hexval.insert(hexval.end(), 110); // hex = 68 0 0 0 0 0 0 0 28 6e
+    // We'll generalize above to append any number of prefixes and suffixes
     int i;
     for (i = prefixSize-1; i >= 0; --i) {
         hexval.insert(hexval.begin(), prefix[i]);
@@ -92,11 +97,19 @@ std::string getKeyString(uint64_t blockNumber, uint8_t prefix[], uint8_t suffix[
     for (i = 0; i < suffixSize; ++i) {
         hexval.insert(hexval.end(), suffix[i]);
     }
-    // append prefix 'h' and 'n' to the hexval bytes
-    // hexval.insert(hexval.begin(), 104); // hex = 68 0 0 0 0 0 0 0 28
-    // hexval.insert(hexval.end(), 110); // hex = 68 0 0 0 0 0 0 0 28 6e
+
 
     // create the key string
     std::string keyString(hexval.begin(), hexval.end());
     return keyString;
+}
+
+// Keccak 256 hash
+CryptoPP::Keccak_256 _keccak;
+std::vector<uint8_t> keccak_256(std::vector<uint8_t> &input) {
+
+    std::vector<uint8_t> digest(_keccak.DigestSize());
+    _keccak.CalculateDigest(digest.data(), input.data(), input.size());
+
+    return digest;
 }
