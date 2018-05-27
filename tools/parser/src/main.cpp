@@ -21,9 +21,6 @@ int main(int argc, const char *argv[]) {
     Block b = parser.getBlock(2267598);
     b.print();
 
-    Block b2 = parser.getBlock(2067598);
-    b2.print();
-
 
 
     delete db;

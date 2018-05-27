@@ -30,13 +30,13 @@ void Header::print() {
 }
 
 void Transaction::print() {
-    // printf("nonce: %d \n",  bytesVectorToInt(nonce));
-    printf("nonce: %s \n",  hexStr((unsigned char *)&nonce[0], nonce.size()).c_str());
+    printf("nonce: %d \n",  bytesVectorToInt(nonce));
+    // printf("nonce: %s \n",  hexStr((unsigned char *)&nonce[0], nonce.size()).c_str());
 
     printf("gasPrice (too large int): %s\n", hexStr((unsigned char *)&gasPrice[0], gasPrice.size()).c_str());
 
-    // printf("gasLimit: %d \n",  bytesVectorToInt(gasLimit));
-    printf("gasLimit: %s \n",  hexStr((unsigned char *)&gasLimit[0], gasLimit.size()).c_str());
+    printf("gasLimit: %d \n",  bytesVectorToInt(gasLimit));
+    // printf("gasLimit: %s \n",  hexStr((unsigned char *)&gasLimit[0], gasLimit.size()).c_str());
 
     printf("to: %s \n",  hexStr((unsigned char *)&to[0], to.size()).c_str());
     printf("value: %s \n",  hexStr((unsigned char *)&value[0], value.size()).c_str());
@@ -99,14 +99,13 @@ std::vector<std::uint8_t> Transaction::recoverTxSender() {
     std::vector<uint8_t> encoded_tx;
     encoded_tx = RLP::serialize(dataFields);
 
-     printf("RLP ENCODED TX : %s\n", hexStr((unsigned char *)&encoded_tx[0], encoded_tx.size()).c_str());
+    // printf("RLP ENCODED TX : %s\n", hexStr((unsigned char *)&encoded_tx[0], encoded_tx.size()).c_str());
 
     std::vector<uint8_t> txHash = keccak_256(encoded_tx);
-    // printf("TX HASH : %s\n", hexStr((unsigned char *)&txHash[0], txHash.size()).c_str());
 
     std::vector<uint8_t> AB;
     AB.reserve( r.size() + s.size() + v.size() );                // preallocate memory
-    // printf("v,r,s SIZES : %d, %d, %d \n", v.size(), r.size(), s.size());
+
     AB.insert( AB.end(), r.begin(), r.end() );        // add A;
     AB.insert( AB.end(), s.begin(), s.end() );
 
@@ -115,14 +114,12 @@ std::vector<std::uint8_t> Transaction::recoverTxSender() {
             new_v -= (chainId * 2 + 8);
     }
 
-    printf("OLD V : %d CHAIN ID: %d, NEW V : %d\n", v[0], chainId, new_v);
+    // printf("OLD V : %d CHAIN ID: %d, NEW V : %d\n", v[0], chainId, new_v);
     AB.insert( AB.end(), new_v );
 
     std::vector<uint8_t > public_key = recover(txHash, AB);
-    // printf("PUB KEY: %s \n",  hexStr((unsigned char *)&public_key[0], public_key.size()).c_str());
 
     std::vector<uint8_t> address = publicKeyToAddress(public_key);
-    // printf("From Address: %s \n Size : %d \n",  hexStr((unsigned char *)&address[0], address.size()).c_str(), address.size());
 
 
     return address;
