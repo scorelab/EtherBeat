@@ -17,8 +17,8 @@ std::vector<uint8_t> recover(std::vector<uint8_t> _message, std::vector<uint8_t>
     std::vector<uint8_t> public_key;
 	int v = _sig[64]-27;
 
-	if (v > 3){
-	    // printf("V > 3: v=%d\n", v);
+	if (v > 3 || v < 0){
+	    printf("Invalid Recid: %d\n", v);
 		return {};
 	}
 

@@ -17,8 +17,18 @@ int main(int argc, const char *argv[]) {
     }
 
     Parser parser(db);
+    /*
+    int count = 0;
+    int i;
+    for(i=1;i<200000;i++) {
+        Block b = parser.getBlock(i);
+        count = count+b.transactions.size();
+    }
+    printf("TOTAL TRANSACTIONS = %d\n", count);
+    */
 
-    Block b = parser.getBlock(2267598);
+    Block b = parser.getBlock(189154);
+    // Block b = parser.getBlock(2267598);
     b.print();
 
 

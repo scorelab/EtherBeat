@@ -45,6 +45,7 @@ void Transaction::print() {
     printf("s: %s \n",  hexStr((unsigned char *)&s[0], s.size()).c_str());
     printf("init: %s \n",  hexStr((unsigned char *)&init[0], init.size()).c_str());
     printf("from: %s \n",  hexStr((unsigned char *)&from[0], from.size()).c_str());
+    printf("hash: %s \n",  hexStr((unsigned char *)&hash[0], hash.size()).c_str());
 }
 
 
@@ -118,7 +119,9 @@ std::vector<std::uint8_t> Transaction::recoverTxSender() {
     AB.insert( AB.end(), new_v );
 
     std::vector<uint8_t > public_key = recover(txHash, AB);
-
+    if (public_key.size() == 0) {
+        return {};
+    }
     std::vector<uint8_t> address = publicKeyToAddress(public_key);
 
 

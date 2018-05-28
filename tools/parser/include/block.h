@@ -36,6 +36,7 @@ class Transaction {
     	std::vector<std::uint8_t> init; // data
 
     	std::vector<std::uint8_t> from;
+    	std::vector<std::uint8_t> hash;
 
     	void print();
     	std::vector<std::uint8_t> recoverTxSender();
@@ -43,8 +44,8 @@ class Transaction {
 
 // Block
 class Block {
-    Header header;
     public:
+        Header header;
         std::vector<uint8_t> hash;
         std::vector<Transaction> transactions;
         std::vector<std::vector<uint8_t>> ommerHashes;

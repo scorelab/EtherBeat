@@ -95,6 +95,14 @@ public:
 	 */
 	static std::vector<std::uint8_t> serialize(
 		const std::vector<RLPField> & dataFields);
+	/**
+	* Get RLP encoded data
+	* @return RLP encoded data
+	*/
+	std::vector<std::uint8_t> serializedData() const {
+	    int start = prefixOffset();
+	    return std::vector<uint8_t> (_contents.begin()+start, _contents.begin()+start+totalLength());
+	}
 
 private:
 	void parseDataLength(std::size_t dataLengthSize);

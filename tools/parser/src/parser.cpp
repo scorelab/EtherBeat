@@ -119,9 +119,16 @@ void Parser::updateBody(Block *block, std::vector<uint8_t> contents, RLP & rlp){
             transaction.r = createByteVector(contents, rlp[0][i][7]);
             transaction.s = createByteVector(contents, rlp[0][i][8]);
 
+            // calculate the hash of the transaction
+            std::vector<uint8_t> rlp_encoded_tx = rlp[0][i].serializedData();
+            transaction.hash = keccak_256(rlp_encoded_tx);
+
             transaction.from = transaction.recoverTxSender();
 
-            // todo : create from field using txHash, v, r, s values
+            if(transaction.from.size() == 0) {
+                printf("Block %d Transaction %d Address Not Found\n", bytesVectorToInt(block->header.number), i+1);
+            }
+
             block->transactions.insert(block->transactions.end(), transaction);
 
         }
