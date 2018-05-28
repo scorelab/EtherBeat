@@ -7,7 +7,11 @@
 // todo : Resize vectors (header attributes, block attributes, transaction attributes) to the required amount of memory
 
 Parser::Parser(leveldb::DB *db):db(db) {}
-
+/*
+*
+* BLOCK RELATED PARSING
+*
+*/
 Block Parser::getBlock(uint64_t blockNumber) {
     // We need to get the hash of the block first.
     std::string hashKey = getKeyString(blockNumber, headerPrefix, numSuffix, 1, 1);
@@ -152,3 +156,41 @@ std::vector<uint8_t> Parser::createByteVector(std::vector<uint8_t> contents, con
     return newVec;
 }
 
+/*
+*
+*   ACCOUNT RELATED PARSING
+*
+*/
+
+Account Parser::getAccount(std::string address) {
+    // todo : get the latest block number
+    uint64_t latestBlock = 100;//189154;
+    return getAccount(address, latestBlock);
+}
+
+Account Parser::getAccount(std::string address, uint64_t blockHeight) {
+    Block b = getBlock(blockHeight);
+
+    if(!b.header.stateRoot.empty()){
+        std::string stateRoot = hexStr((unsigned char *)&b.header.stateRoot[0], b.header.stateRoot.size());
+
+        std::vector<uint8_t > raw_key = getByteVector(address);
+        std::vector<uint8_t > hash_key = keccak_256(raw_key);
+        std::string key = hexStr((unsigned char *)&hash_key[0], hash_key.size());
+
+        std::string value;
+        leveldb::Status status = db->Get(leveldb::ReadOptions(), stateRoot, &value);
+
+        if (status.ok()) {
+            printf("ADDRESS FOUND\n");
+            print_bytes(value);
+        }else {
+            printf("ADDRESS NOT FOUND\n");
+        }
+    }
+
+
+    Account account;
+
+    return account;
+}

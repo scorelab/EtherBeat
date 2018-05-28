@@ -1,4 +1,5 @@
 #include "block.h"
+#include "account.h"
 #include "rlp.h"
 #include "leveldb/db.h"
 #include <vector>
@@ -14,6 +15,9 @@ class Parser {
     public:
         Parser(leveldb::DB *);
         Block getBlock(uint64_t);
+
+        Account getAccount(std::string address);
+        Account getAccount(std::string address, uint64_t blockHeight);
     private:
         void updateHeader(Header *header, std::vector<uint8_t> contents, RLP & rlp);
         void updateBody(Block *block, std::vector<uint8_t> contents, RLP & rlp);

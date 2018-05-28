@@ -1,5 +1,6 @@
 #include "leveldb/db.h"
 #include "parser.h"
+#include "utils.h"
 #include <iostream>
 
 int main(int argc, const char *argv[]) {
@@ -22,14 +23,22 @@ int main(int argc, const char *argv[]) {
     int i;
     for(i=1;i<200000;i++) {
         Block b = parser.getBlock(i);
+        if (!b.transactions.empty()) break;
         count = count+b.transactions.size();
     }
-    printf("TOTAL TRANSACTIONS = %d\n", count);
+    printf("BLOCK = %d, TOTAL TRANSACTIONS = %d\n", i, count);
     */
 
-    Block b = parser.getBlock(189154);
+    Block b = parser.getBlock(55);
+    // Block b = parser.getBlock(189154);
     // Block b = parser.getBlock(2267598);
     b.print();
+
+    if(!b.transactions.empty()) {
+        std::string addr = hexStr((unsigned char *)&b.transactions[0].from[0], b.transactions[0].from.size());
+        Account acc = parser.getAccount(addr);
+
+    }
 
 
 

@@ -119,7 +119,7 @@ std::vector<std::uint8_t> Transaction::recoverTxSender() {
     AB.insert( AB.end(), new_v );
 
     std::vector<uint8_t > public_key = recover(txHash, AB);
-    if (public_key.size() == 0) {
+    if (public_key.empty()) {
         return {};
     }
     std::vector<uint8_t> address = publicKeyToAddress(public_key);

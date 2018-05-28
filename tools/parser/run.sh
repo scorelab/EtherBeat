@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-project_dir='./tools/parser'
-cd ${project_dir}
+#project_dir='./tools/parser'
+#cd ${project_dir}
 
 rm -rf build
 mkdir build
