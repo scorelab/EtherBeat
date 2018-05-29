@@ -55,7 +55,6 @@ std::vector<std::uint8_t> Transaction::recoverTxSender() {
     if(chainId > 0) {
         chainId = (v[0]-35)/2;
     }
-    // printf("Chain Id : %d\n", chainId);
 
     //RLP encode tx
     std::vector<RLPField> dataFields;
@@ -101,24 +100,19 @@ std::vector<std::uint8_t> Transaction::recoverTxSender() {
     encoded_tx = RLP::serialize(dataFields);
 
     // printf("RLP ENCODED TX : %s\n", hexStr((unsigned char *)&encoded_tx[0], encoded_tx.size()).c_str());
-
+    std::string test1 = hexStr((unsigned char *)&encoded_tx[0], encoded_tx.size());
     std::vector<uint8_t> txHash = keccak_256(encoded_tx);
+    std::string test2 = hexStr((unsigned char *)&txHash[0], txHash.size());
 
-    std::vector<uint8_t> AB;
-    AB.reserve( r.size() + s.size() + v.size() );                // preallocate memory
 
-    AB.insert( AB.end(), r.begin(), r.end() );        // add A;
-    AB.insert( AB.end(), s.begin(), s.end() );
 
     uint8_t new_v = v[0];
     if (chainId > 0) {
             new_v -= (chainId * 2 + 8);
     }
 
-    // printf("OLD V : %d CHAIN ID: %d, NEW V : %d\n", v[0], chainId, new_v);
-    AB.insert( AB.end(), new_v );
 
-    std::vector<uint8_t > public_key = recover(txHash, AB);
+    std::vector<uint8_t > public_key = recover(new_v, r, s, txHash);
     if (public_key.empty()) {
         return {};
     }

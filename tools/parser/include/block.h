@@ -28,7 +28,7 @@ class Transaction {
         std::vector<std::uint8_t> nonce;
     	std::vector<std::uint8_t> gasPrice;
     	std::vector<std::uint8_t> gasLimit;
-    	std::vector<std::uint8_t> to;
+    	std::vector<std::uint8_t> to; // No TO address is getting for contact creation transactions
     	std::vector<std::uint8_t> value; // in wei (1 ETH = 10^18 wei)
     	std::vector<std::uint8_t> v;
     	std::vector<std::uint8_t> r;

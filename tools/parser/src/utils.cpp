@@ -17,6 +17,21 @@ std::string hexStr(unsigned char *data, int len)
   return s;
 }
 
+// hex to bytes
+std::vector<uint8_t> hex_to_bytes(std::string const& hex)
+{
+    std::vector<uint8_t> bytes;
+    bytes.reserve(hex.size() / 2);
+    for (std::string::size_type i = 0, i_end = hex.size(); i < i_end; i += 2)
+    {
+        unsigned byte;
+        std::istringstream hex_byte(hex.substr(i, 2));
+        hex_byte >> std::hex >> byte;
+        bytes.push_back(static_cast<uint8_t>(byte));
+    }
+    return bytes;
+}
+
 // Print bytes for a given byte string
 void print_bytes (std::string val, std::string heading="Bytes"){
     printf("%s : [", heading.c_str());
@@ -102,6 +117,13 @@ std::string getKeyString(uint64_t blockNumber, uint8_t prefix[], uint8_t suffix[
     // create the key string
     std::string keyString(hexval.begin(), hexval.end());
     return keyString;
+}
+
+std::string remove0xFromString(std::string hex_str){
+    if (hex_str.length() > 1 && hex_str.substr(0, 2) == "0x") {
+        return hex_str.substr(2, hex_str.length()-2);
+    }
+    return hex_str;
 }
 
 // Keccak 256 hash

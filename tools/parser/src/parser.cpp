@@ -17,62 +17,94 @@ Block Parser::getBlock(uint64_t blockNumber) {
     std::string hashKey = getKeyString(blockNumber, headerPrefix, numSuffix, 1, 1);
     // create a string variable to store the hash
     std::string blockHash;
-    // get the value from leveldb
+
+    std::string test = hexStr((unsigned char *)&hashKey[0], hashKey.size()).c_str();
     leveldb::Status shk = db->Get(leveldb::ReadOptions(), hashKey, &blockHash);
 
     if (shk.ok()) {
-
-        std::string headerKey = createBlockHeaderKey(blockNumber, blockHash);
-
-        std::string blockHeaderData;
-        leveldb::Status sbhd = db->Get(leveldb::ReadOptions(), headerKey, &blockHeaderData);
-
-        if (sbhd.ok()){
-            // Header content retrieval success
-            std::vector<uint8_t> header_content;
-            header_content = getByteVector(blockHeaderData);
-
-            RLP rlp_header{header_content};
-            // printf("RLP Items %d\n", rlp_header.numItems());
-
-            Header h;
-            updateHeader(&h, header_content, rlp_header);
-
-            // create a new block and add the header
-            Block block(h);
-            block.hash = getByteVector(blockHash);
-
-            // Get block body content
-            std::string bodyKey = createBlockBodyKey(blockNumber, blockHash);
-
-            std::string blockBodyData;
-            leveldb::Status sbbd = db->Get(leveldb::ReadOptions(), bodyKey, &blockBodyData);
-
-            if (sbbd.ok()) {
-                // print_bytes(blockBodyData);
-                // Header content retrieval success
-                std::vector<uint8_t> body_content;
-                body_content = getByteVector(blockBodyData);
-
-                RLP rlp_body{body_content};
-                updateBody(&block, body_content, rlp_body);
-
-            }else{
-                printf("\n Body Not Found \n");
-            }
-
-
-            return block;
-        }
-
-
-
-    }else {
-        std::cout << "key not found" << std::endl;
+        return getBlock(blockNumber, blockHash);
     }
 
     throw;
 }
+
+Block Parser::getBlock(std::string blockHashHex) {
+
+    blockHashHex = remove0xFromString(blockHashHex);
+
+    std::vector<uint8_t > hexval = hex_to_bytes(blockHashHex);
+
+    // block hash byte string
+    std::string blockHash(hexval.begin(), hexval.end());
+
+    // append db key prefix
+    hexval.insert(hexval.begin(), blockHashPrefix[0]);
+    std::string keyString(hexval.begin(), hexval.end());
+
+    // create a string variable to store the number
+    std::string blockNumber;
+    // get the value from leveldb
+    leveldb::Status shk = db->Get(leveldb::ReadOptions(), keyString, &blockNumber);
+
+    if (shk.ok()) {
+        uint64_t number = bytesVectorToInt(getByteVector(blockNumber));
+        return getBlock(number, blockHash);
+    } else {
+        printf("INVALID HASH : %s\n", shk.ToString().c_str());
+    }
+
+    throw;
+}
+
+Block Parser::getBlock(uint64_t blockNumber, std::string blockHash){
+
+    std::string headerKey = createBlockHeaderKey(blockNumber, blockHash);
+
+    std::string blockHeaderData;
+    leveldb::Status sbhd = db->Get(leveldb::ReadOptions(), headerKey, &blockHeaderData);
+
+    if (sbhd.ok()){
+        // Header content retrieval success
+        std::vector<uint8_t> header_content;
+        header_content = getByteVector(blockHeaderData);
+
+        RLP rlp_header{header_content};
+        // printf("RLP Items %d\n", rlp_header.numItems());
+
+        Header h;
+        updateHeader(&h, header_content, rlp_header);
+
+        // create a new block and add the header
+        Block block(h);
+        block.hash = getByteVector(blockHash);
+
+        // Get block body content
+        std::string bodyKey = createBlockBodyKey(blockNumber, blockHash);
+
+        std::string blockBodyData;
+        leveldb::Status sbbd = db->Get(leveldb::ReadOptions(), bodyKey, &blockBodyData);
+
+        if (sbbd.ok()) {
+            // print_bytes(blockBodyData);
+            // Header content retrieval success
+            std::vector<uint8_t> body_content;
+            body_content = getByteVector(blockBodyData);
+
+            RLP rlp_body{body_content};
+            updateBody(&block, body_content, rlp_body);
+
+        }else{
+            printf("\n Body Not Found \n");
+        }
+
+
+        return block;
+    }
+
+
+    throw;
+}
+
 
 //get block header key
 std::string Parser::createBlockHeaderKey(int blockNumber, std::string blockHash) {
@@ -169,16 +201,19 @@ Account Parser::getAccount(std::string address) {
 }
 
 Account Parser::getAccount(std::string address, uint64_t blockHeight) {
+    // todo : has to implement using merkel patricia tree
     Block b = getBlock(blockHeight);
 
     if(!b.header.stateRoot.empty()){
-        std::string stateRoot = hexStr((unsigned char *)&b.header.stateRoot[0], b.header.stateRoot.size());
 
-        std::vector<uint8_t > raw_key = getByteVector(address);
-        std::vector<uint8_t > hash_key = keccak_256(raw_key);
-        std::string key = hexStr((unsigned char *)&hash_key[0], hash_key.size());
+        // std::vector<uint8_t > raw_key = getByteVector(address);
+        // std::vector<uint8_t > hash_key = keccak_256(raw_key);
+        // std::string key = hexStr((unsigned char *)&hash_key[0], hash_key.size());
 
         std::string value;
+
+        // Get byte string of state root
+        std::string stateRoot (b.header.stateRoot.begin(), b.header.stateRoot.end());
         leveldb::Status status = db->Get(leveldb::ReadOptions(), stateRoot, &value);
 
         if (status.ok()) {
