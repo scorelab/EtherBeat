@@ -28,7 +28,18 @@ void Header::print() {
     printf("nonce: %s \n",  hexStr((unsigned char *)&nonce[0], nonce.size()).c_str());
 
 }
+void TransactionReceipt::print() {
+    printf("blockNumber: %d \n", blockNumber);
+    printf("blockHash: %s \n",  hexStr((unsigned char *)&blockHash[0], blockHash.size()).c_str());
+    printf("transactionIndex: %d \n", transactionIndex);
 
+    printf("status: %s \n",  hexStr((unsigned char *)&status[0], status.size()).c_str());
+    printf("cumulativeGasUsed: %d \n",  bytesVectorToInt(cumulativeGasUsed));
+    printf("logsBloom: %s \n",  hexStr((unsigned char *)&logsBloom[0], logsBloom.size()).c_str());
+    printf("transactionHash: %s \n",  hexStr((unsigned char *)&transactionHash[0], transactionHash.size()).c_str());
+    printf("contractAddress: %s \n",  hexStr((unsigned char *)&contractAddress[0], contractAddress.size()).c_str());
+    printf("gasUsed: %d \n", bytesVectorToInt(gasUsed));
+}
 void Transaction::print() {
     printf("nonce: %d \n",  bytesVectorToInt(nonce));
     // printf("nonce: %s \n",  hexStr((unsigned char *)&nonce[0], nonce.size()).c_str());

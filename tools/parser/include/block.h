@@ -20,6 +20,31 @@ class Header {
         std::vector<uint8_t> nonce;
 	    void print();
 };
+// Transaction Receipt Meta
+struct TransactionReceiptMeta {
+    uint64_t index;
+    uint64_t blockNumber;
+    std::string blockHash;
+    uint8_t status = 0;
+};
+//Transaction Receipt
+class TransactionReceipt {
+    public:
+        uint64_t blockNumber;
+        std::vector<std::uint8_t> blockHash;
+        uint64_t transactionIndex;
+
+        // from db
+        std::vector<std::uint8_t> status;
+        std::vector<std::uint8_t> cumulativeGasUsed;
+        std::vector<std::uint8_t> logsBloom;
+        std::vector<std::uint8_t> transactionHash;
+        std::vector<std::uint8_t> contractAddress; // if a contract creation tx, address of contract created otherwise empty
+        // std::vector<std::uint8_t> logs; // array, won't consider decoding in this phase
+        std::vector<std::uint8_t> gasUsed;
+
+        void print();
+};
 
 //Transaction
 class Transaction {
@@ -41,6 +66,8 @@ class Transaction {
     	void print();
     	std::vector<std::uint8_t> recoverTxSender();
 };
+
+
 
 // Block
 class Block {

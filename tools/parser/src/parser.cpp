@@ -14,7 +14,7 @@ Parser::Parser(leveldb::DB *db):db(db) {}
 */
 Block Parser::getBlock(uint64_t blockNumber) {
     // We need to get the hash of the block first.
-    std::string hashKey = getKeyString(blockNumber, headerPrefix, numSuffix, 1, 1);
+    std::string hashKey = createBlockHashKey(blockNumber);
     // create a string variable to store the hash
     std::string blockHash;
 
@@ -93,10 +93,14 @@ Block Parser::getBlock(uint64_t blockNumber, std::string blockHash){
             RLP rlp_body{body_content};
             updateBody(&block, body_content, rlp_body);
 
+            // std::vector<TransactionReceipt> receipts = getBlockTxReceipts(blockNumber, blockHash);
+
+
         }else{
             printf("\n Body Not Found \n");
         }
 
+        // get block tx receipt data
 
         return block;
     }
@@ -104,17 +108,84 @@ Block Parser::getBlock(uint64_t blockNumber, std::string blockHash){
 
     throw;
 }
+// get transaction receipt
+TransactionReceipt Parser::getTransactionReceipt(std::string transactionHashHex) {
 
+    transactionHashHex = remove0xFromString(transactionHashHex);
+
+    // creating block hash byte string
+    std::vector<uint8_t > hexval = hex_to_bytes(transactionHashHex);
+    std::string txHash(hexval.begin(), hexval.end());
+
+    // append db key prefix
+    std::string lookupKey = createLookupKey(txHash);
+
+    std::string txReceiptMetaData;
+    leveldb::Status srmd = db->Get(leveldb::ReadOptions(), lookupKey, &txReceiptMetaData);
+
+    if(srmd.ok()) {
+        std::vector<uint8_t> receipt_contents;
+        receipt_contents = getByteVector(txReceiptMetaData);
+
+        RLP rlp_receipts{receipt_contents};
+
+        TransactionReceiptMeta meta;
+        updateTxReceiptMeta(&meta, receipt_contents, rlp_receipts);
+        if (meta.status == 1) {
+            TransactionReceipt txReceipt = getBlockTxReceipts(meta.blockNumber, meta.blockHash)[meta.index];
+            return txReceipt;
+        }
+    }
+    throw;
+}
+// get tx receipts of the block
+std::vector<TransactionReceipt> Parser::getBlockTxReceipts(uint64_t blockNumber, std::string blockHash) {
+
+    std::string receiptsKey = createBlockReceiptKey(blockNumber, blockHash);
+
+    std::string blockReceiptData;
+    leveldb::Status sbrd = db->Get(leveldb::ReadOptions(), receiptsKey, &blockReceiptData);
+
+    if (sbrd.ok()){
+        std::vector<uint8_t> receipt_contents;
+        receipt_contents = getByteVector(blockReceiptData);
+
+        RLP rlp_receipts{receipt_contents};
+
+        std::vector<TransactionReceipt> receipts;
+
+        updateTxReceipts(&receipts, blockNumber, getByteVector(blockHash), receipt_contents, rlp_receipts);
+
+        return receipts;
+    }
+    return {};
+}
+
+// create block hash key
+std::string Parser::createBlockHashKey(uint64_t blockNumber) {
+    return getKeyString(headerPrefix, &toBigEndianEightBytes(blockNumber)[0], numSuffix, 1, 8, 1);
+}
 
 //get block header key
-std::string Parser::createBlockHeaderKey(int blockNumber, std::string blockHash) {
-    return getKeyString(blockNumber, headerPrefix, (uint8_t *)&blockHash[0], 1, 32);
+std::string Parser::createBlockHeaderKey(uint64_t blockNumber, std::string blockHash) {
+    return getKeyString(headerPrefix, &toBigEndianEightBytes(blockNumber)[0], (uint8_t *)&blockHash[0], 1, 8, 32);
 }
 
 //get block body key
-std::string Parser::createBlockBodyKey(int blockNumber, std::string blockHash) {
-    return getKeyString(blockNumber, bodyPrefix, (uint8_t *)&blockHash[0], 1, 32);
+std::string Parser::createBlockBodyKey(uint64_t blockNumber, std::string blockHash) {
+    return getKeyString(bodyPrefix, &toBigEndianEightBytes(blockNumber)[0], (uint8_t *)&blockHash[0], 1, 8, 32);
 }
+
+//get block receipts key
+std::string Parser::createBlockReceiptKey(uint64_t blockNumber, std::string blockHash) {
+    return getKeyString(blockReceiptsPrefix, &toBigEndianEightBytes(blockNumber)[0], (uint8_t *)&blockHash[0], 1, 8, 32);
+}
+
+//get tx lookup key
+std::string Parser::createLookupKey(std::string transactionHash) {
+    return getKeyString(lookupPrefix, (uint8_t *)&transactionHash[0], {}, 1, 32, 0);
+}
+
 
 void Parser::updateHeader(Header *header, std::vector<uint8_t> contents, RLP & rlp){
 
@@ -181,6 +252,43 @@ void Parser::updateBody(Block *block, std::vector<uint8_t> contents, RLP & rlp){
     }
 
 }
+
+void Parser::updateTxReceiptMeta(TransactionReceiptMeta *meta, std::vector<uint8_t> contents, RLP & rlp) {
+
+    if (rlp.numItems() == 3) {
+        std::vector<uint8_t> tempVec =  createByteVector(contents, rlp[0]);
+        meta->blockHash = std::string(tempVec.begin(), tempVec.end());
+
+        meta->blockNumber = (uint64_t)bytesVectorToInt(createByteVector(contents, rlp[1]));
+
+        meta->index = (uint64_t)bytesVectorToInt(createByteVector(contents, rlp[2]));
+
+        meta->status = 1;
+    }
+}
+
+void Parser::updateTxReceipts(std::vector<TransactionReceipt> *receipts, uint64_t blockNumber, std::vector<uint8_t> blockHash, std::vector<uint8_t> contents, RLP & rlp){
+    int i;
+    for (i=0; i<rlp.numItems(); i++) {
+        TransactionReceipt receipt;
+
+        receipt.blockNumber = blockNumber;
+        receipt.transactionIndex = i;
+        receipt.blockHash = blockHash;
+
+        // get transactions
+        receipt.status = createByteVector(contents, rlp[i][0]);
+        receipt.cumulativeGasUsed = createByteVector(contents, rlp[i][1]);
+        receipt.logsBloom = createByteVector(contents, rlp[i][2]);
+        receipt.transactionHash = createByteVector(contents, rlp[i][3]);
+        receipt.contractAddress = createByteVector(contents, rlp[i][4]);
+        // receipt.logs; // array, won't consider decoding in this phase
+        receipt.gasUsed = createByteVector(contents, rlp[i][6]);
+
+        receipts->insert(receipts->end(), receipt);
+    }
+}
+
 std::vector<uint8_t> Parser::createByteVector(std::vector<uint8_t> contents, const RLP & rlp) {
     std::vector<uint8_t>::const_iterator first = contents.begin() + rlp.dataOffset();
     std::vector<uint8_t>::const_iterator last = contents.begin() + rlp.dataOffset() + rlp.dataLength();
@@ -201,7 +309,7 @@ Account Parser::getAccount(std::string address) {
 }
 
 Account Parser::getAccount(std::string address, uint64_t blockHeight) {
-    // todo : has to implement using merkel patricia tree
+    // todo : not implemented. has to implement using merkel patricia tree
     Block b = getBlock(blockHeight);
 
     if(!b.header.stateRoot.empty()){

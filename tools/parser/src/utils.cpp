@@ -77,38 +77,46 @@ std::vector<uint8_t> getByteVector(std::string byteString){
     return contents;
 }
 
-
-std::string getKeyString(uint64_t blockNumber, uint8_t prefix[], uint8_t suffix[], int prefixSize = 1, int suffixSize = 1){
-
+std::vector<uint8_t> toBigEndianEightBytes(uint64_t number) {
     /*
-        Convert blockNumber to bigendian notation array of uint8_t
+        Convert number to bigendian notation array of uint8_t
     */
-    uint8_t *p = (uint8_t *)&blockNumber;
+    uint8_t *p = (uint8_t *)&number;
     //if you need a copy
-    uint8_t result[8];
+    std::vector<uint8_t> result;
 
-    result[0] = (blockNumber >> 56) & 0xFF;
-    result[1] = (blockNumber >> 48) & 0xFF;
-    result[2] = (blockNumber >> 40) & 0xFF;
-    result[3] = (blockNumber >> 32) & 0xFF;
-    result[4] = (blockNumber >> 24) & 0xFF;
-    result[5] = (blockNumber >> 16) & 0xFF;
-    result[6] = (blockNumber >> 8) & 0xFF;
-    result[7] = blockNumber & 0xFF;
+    result.reserve(8);
 
-    std::vector<uint8_t> hexval; // = {0,0,0,0,0,0,0, blockNumber}; // hex = 0 0 0 0 0 0 0 28
-    for(uint8_t c : result) {
-        hexval.insert(hexval.end(), c);
-    }
+    result[0] = (number >> 56) & 0xFF;
+    result[1] = (number >> 48) & 0xFF;
+    result[2] = (number >> 40) & 0xFF;
+    result[3] = (number >> 32) & 0xFF;
+    result[4] = (number >> 24) & 0xFF;
+    result[5] = (number >> 16) & 0xFF;
+    result[6] = (number >> 8) & 0xFF;
+    result[7] = number & 0xFF;
+
+    return  result;
+}
+
+std::string getKeyString(uint8_t prefix[], uint8_t middle[], uint8_t suffix[], int prefixSize = 0, int middleSize=0, int suffixSize = 0){
+
+    std::vector<uint8_t> hexval;
 
     // Example append prefix 'h' and suffix 'n' to the hexval bytes
     // hexval.insert(hexval.begin(), 104); // hex = 68 0 0 0 0 0 0 0 28
     // hexval.insert(hexval.end(), 110); // hex = 68 0 0 0 0 0 0 0 28 6e
-    // We'll generalize above to append any number of prefixes and suffixes
+
+    // We'll generalize above to append any number of middle , prefixes and suffixes
     int i;
+    for(i=0; i<middleSize; i++){
+        hexval.insert(hexval.end(), middle[i]);
+    }
+
     for (i = prefixSize-1; i >= 0; --i) {
         hexval.insert(hexval.begin(), prefix[i]);
     }
+
     for (i = 0; i < suffixSize; ++i) {
         hexval.insert(hexval.end(), suffix[i]);
     }
