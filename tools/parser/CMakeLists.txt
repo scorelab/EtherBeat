@@ -11,7 +11,7 @@ include_directories(include)
 
 set(IS_LIBRARY FALSE)
 if(NOT ${IS_LIBRARY})
-    #Set SOURCES with all cpp files in src directory
+    #Set SOURCES with all cpp files in src directory excluding main file
     set(SOURCES
             src/utils.cpp
             src/rlp.cpp
