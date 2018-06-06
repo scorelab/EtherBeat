@@ -47,16 +47,18 @@ int main(int argc, const char *argv[]) {
     std::cout << (ms2.count()-ms1.count())/1000 << std::endl;
     */
 
+    // Block b = parser.getBlock("0xe01eb24a18d0c117409a7b8946ed16b4c485ed79746644b89250384ed9bf2fda");
     // Block b2 = parser.getBlock("0xdb16f0d4465f2fd79f10ba539b169404a3e026db1be082e7fd6071b4c5f37db7");
     // b2.print();
 
-    Block b = parser.getBlock(189154);
-    b.print();
+    // Block b = parser.getBlock(189154);
+    // Block b = parser.getBlock(1);
+    // b.print();
     // Block b = parser.getBlock(2267598);
     // Block b = parser.getBlock(1795026);
     // b.print();
 
-    // TransactionReceipt tr = parser.getTransactionReceipt("0x9a143676d4bea7a8a6e2396cb14b2d9e32c984c867935e86e2db1cce63d7b931");
+    TransactionReceipt tr = parser.getTransactionReceipt("0xfddd30b69b0c4f918785e83c8b8ddd21fe3e2019a142fc382b88fa5de6c88fa2");
     // tr.print();
     // testing account
     /*
