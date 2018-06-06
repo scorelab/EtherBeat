@@ -11,33 +11,23 @@ include_directories(include)
 
 set(IS_LIBRARY FALSE)
 if(NOT ${IS_LIBRARY})
-  #Set SOURCES with all cpp files in src directory
-  file(GLOB SOURCES "src/*.cpp")
+    #Set SOURCES with all cpp files in src directory
+    set(SOURCES
+            src/utils.cpp
+            src/rlp.cpp
+            src/parser.cpp
+            src/block.cpp
+            src/address_recover.cpp
+            src/account.cpp
+     )
 
-  add_executable(${PROJECT_NAME} ${SOURCES})
-  target_link_libraries (${PROJECT_NAME} leveldb cryptopp secp256k1 ${BASE_LIBS})
-endif()
+    set(MAIN src/main.cpp)
+    add_executable(${PROJECT_NAME} ${MAIN} ${SOURCES})
+    target_link_libraries (${PROJECT_NAME} leveldb cryptopp secp256k1 gtest ${BASE_LIBS})
 
-# Build shared library for python
-# todo
-if(${IS_LIBRARY})
-  #Set SOURCES with all cpp files in src directory
-  file(GLOB SOURCES "src/*.cpp" "wrapper/*.cpp")
+    file(GLOB TEST_SRCS "test/*.cpp")
+    add_executable(test_parser ${SOURCES} ${TEST_SRCS} )
+    target_link_libraries (test_parser leveldb cryptopp secp256k1 gtest ${BASE_LIBS})
 
-  # Find default python libraries and interpreter
-  find_package(PythonInterp REQUIRED)
-  find_package(PythonLibs REQUIRED)
-  FIND_PACKAGE(Boost COMPONENTS python3)
 
-  include_directories(${Boost_INCLUDE_DIR} ${PYTHON_INCLUDE_DIRS})
-  LINK_LIBRARIES(${Boost_LIBRARIES} ${PYTHON_LIBRARIES})
-
-  # Build and link the module
-  add_library(${PROJECT_NAME} SHARED ${SOURCES})
-  target_link_libraries(${PROJECT_NAME} leveldb ${BASE_LIBS} ${Boost_LIBRARIES} ${PYTHON_LIBRARIES})
-  add_dependencies(${PROJECT_NAME} Boost)
-
-  # Tweaks the name of the library to match what Python expects
-  set_target_properties(${PROJECT_NAME} PROPERTIES SUFFIX .so)
-  set_target_properties(${PROJECT_NAME} PROPERTIES PREFIX "")
 endif()

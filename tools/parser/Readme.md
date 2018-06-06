@@ -2,7 +2,13 @@
 ## Dependencies
 Install the below dependencies in your environment.
  - leveldb
+ `pacman -S leveldb`
  - cryptopp
+ `pacman -S crypto++`
+ - secp256k1
+ `pacman -S libsecp256k1`
+ - gtest
+ `pacman -S gtest`
 
 ## Running the project
  - ./run.sh
