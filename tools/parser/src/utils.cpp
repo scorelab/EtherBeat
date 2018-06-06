@@ -86,7 +86,15 @@ std::vector<uint8_t> toBigEndianEightBytes(uint64_t number) {
     std::vector<uint8_t> result;
 
     result.reserve(8);
-
+    result.insert(result.end(), (number >> 56) & 0xFF);
+    result.insert(result.end(), (number >> 48) & 0xFF);
+    result.insert(result.end(), (number >> 40) & 0xFF);
+    result.insert(result.end(), (number >> 32) & 0xFF);
+    result.insert(result.end(), (number >> 24) & 0xFF);
+    result.insert(result.end(), (number >> 16) & 0xFF);
+    result.insert(result.end(), (number >> 8) & 0xFF);
+    result.insert(result.end(), number & 0xFF);
+    /*
     result[0] = (number >> 56) & 0xFF;
     result[1] = (number >> 48) & 0xFF;
     result[2] = (number >> 40) & 0xFF;
@@ -95,7 +103,7 @@ std::vector<uint8_t> toBigEndianEightBytes(uint64_t number) {
     result[5] = (number >> 16) & 0xFF;
     result[6] = (number >> 8) & 0xFF;
     result[7] = number & 0xFF;
-
+    */
     return  result;
 }
 

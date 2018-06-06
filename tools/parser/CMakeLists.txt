@@ -26,7 +26,7 @@ if(NOT ${IS_LIBRARY})
     target_link_libraries (${PROJECT_NAME} leveldb cryptopp secp256k1 gtest ${BASE_LIBS})
 
     file(GLOB TEST_SRCS "test/*.cpp")
-    add_executable(test_parser ${SOURCES} ${TEST_SRCS} )
+    add_executable(test_parser ${SOURCES} ${TEST_SRCS})
     target_link_libraries (test_parser leveldb cryptopp secp256k1 gtest ${BASE_LIBS})
 
 
