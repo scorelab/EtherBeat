@@ -1,3 +1,6 @@
+/*
+ * Adapted from PA193_test_parser_Ethereum on 5/19/18.
+*/
 #ifndef RLP_H
 #define RLP_H
 
