@@ -2,7 +2,6 @@
  * Created by prabushitha on 5/19/18.
 */
 #include "parser.h"
-#include "utils.h"
 #include "rlp.h"
 #include <vector>
 #include <iostream>

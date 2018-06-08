@@ -2,7 +2,6 @@
  * Created by prabushitha on 5/19/18.
 */
 #include "block.h"
-#include "utils.h"
 #include <vector>
 #include <string>
 
@@ -139,7 +138,7 @@ std::vector<std::uint8_t> Transaction::recoverTxSender() {
 Block::Block(Header header):header(header) {}
 void Block::print() {
     printf("---------- Block : %d ----------\n", bytesVectorToInt(header.number_bytes));
-    printf("hash: %s \n",  hexStr((unsigned char *)&hash_bytes[0], hash_bytes.size()).c_str());
+    printf("hash: %s \n",  bytesVectorToHexString(hash_bytes).c_str());
     header.print();
     printf("----Transactions------\n[\n");
     for(Transaction t : transactions){

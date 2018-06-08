@@ -3,6 +3,8 @@
 */
 #include <vector>
 #include <iostream>
+#include "utils.h"
+
 // Block Header
 class Header {
     public:
@@ -21,7 +23,23 @@ class Header {
         std::vector<uint8_t> extraData_bytes;
         std::vector<uint8_t> mixHash_bytes;
         std::vector<uint8_t> nonce_bytes;
+        // methods
 	    void print();
+	    std::string getParentHash(){return bytesVectorToHexString(parentHash_bytes);};
+	    std::string getSha3Uncles(){return bytesVectorToHexString(sha3Uncles_bytes);};
+	    std::string getBeneficiary(){return bytesVectorToHexString(beneficiary_bytes);};
+	    std::string getStateRoot(){return bytesVectorToHexString(stateRoot_bytes);};
+	    std::string getTransactionsRoot(){return bytesVectorToHexString(transactionsRoot_bytes);};
+	    std::string getReceiptsRoot(){return bytesVectorToHexString(receiptsRoot_bytes);};
+	    std::string getLogsBloom(){return bytesVectorToHexString(logsBloom_bytes);};
+	    std::string getDifficulty(){return bytesVectorToHexString(difficulty_bytes);};
+	    std::string getNumber(){return bytesVectorToHexString(number_bytes);};
+	    std::string getGasLimit(){return bytesVectorToHexString(gasLimit_bytes);};
+	    std::string getGasUsed(){return bytesVectorToHexString(gasUsed_bytes);};
+	    std::string getTimestamp(){return bytesVectorToHexString(timestamp_bytes);};
+	    std::string getExtraData(){return bytesVectorToHexString(extraData_bytes);};
+	    std::string getMixHash(){return bytesVectorToHexString(mixHash_bytes);};
+	    std::string getNonce(){return bytesVectorToHexString(nonce_bytes);};
 };
 // Transaction Receipt Meta
 struct TransactionReceiptMeta {
@@ -49,6 +67,14 @@ class TransactionReceipt {
         std::vector<std::uint8_t> gasUsed_bytes;
 
         void print();
+		std::string getBlockHash(){return bytesVectorToHexString(blockHash_bytes);};
+		std::string getStatus(){return bytesVectorToHexString(status_bytes);};
+		std::string getCumulativeGasUsed(){return bytesVectorToHexString(cumulativeGasUsed_bytes);};
+		std::string getLogsBloom(){return bytesVectorToHexString(logsBloom_bytes);};
+		std::string getTransactionHash(){return bytesVectorToHexString(transactionHash_bytes);};
+		std::string getContractAddress(){return bytesVectorToHexString(contractAddress_bytes);};
+		std::string getGasUsed(){return bytesVectorToHexString(gasUsed_bytes);};
+
 };
 
 //Transaction
@@ -69,6 +95,18 @@ class Transaction {
 
     	void print();
     	std::vector<std::uint8_t> recoverTxSender();
+    	// getters
+		std::string getNonce(){return bytesVectorToHexString(nonce_bytes);};
+		std::string getGasPrice(){return bytesVectorToHexString(gasPrice_bytes);};
+		std::string getGasLimit(){return bytesVectorToHexString(gasLimit_bytes);};
+		std::string getTo(){return bytesVectorToHexString(to_bytes);};
+		std::string getValue(){return bytesVectorToHexString(value_bytes);};
+		std::string getV(){return bytesVectorToHexString(v_bytes);};
+		std::string getR(){return bytesVectorToHexString(r_bytes);};
+		std::string getS(){return bytesVectorToHexString(s_bytes);};
+		std::string getData(){return bytesVectorToHexString(init_bytes);};
+		std::string getFrom(){return bytesVectorToHexString(from_bytes);};
+		std::string getHash(){return bytesVectorToHexString(hash_bytes);};
 };
 
 
@@ -82,6 +120,18 @@ class Block {
         std::vector<std::vector<uint8_t>> ommerHashes_bytes;
         Block(Header header);
         void print();
+
+        //getters
+		std::string getHash(){return bytesVectorToHexString(hash_bytes);};
+		std::vector<Transaction> getTransactions(){return transactions;};
+		std::vector<std::string> getOmmers(){
+			std::vector<std::string> ommers;
+			int i;
+			for(i=0; i<ommerHashes_bytes.size(); i++) {
+				ommers.insert(ommers.end(), bytesVectorToHexString(ommerHashes_bytes[i]));
+			}
+			return ommers;
+		};
 
 };
 

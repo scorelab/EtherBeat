@@ -71,6 +71,12 @@ size_t bytesVectorToInt(std::vector<uint8_t> bytes_arr) {
     return dest;
 }
 
+std::string bytesVectorToHexString(std::vector<uint8_t> attribute) {
+    if(attribute.empty()) return "";
+    std::string attr_string = hexStr(&attribute[0], (int) attribute.size());
+    return attr_string;
+}
+
 std::vector<uint8_t> getByteVector(std::string byteString){
     std::vector<uint8_t> contents;
     int i;
@@ -154,3 +160,4 @@ std::vector<uint8_t> keccak_256(std::vector<uint8_t> &input) {
 
     return digest;
 }
+

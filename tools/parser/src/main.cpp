@@ -3,7 +3,6 @@
 */
 #include "leveldb/db.h"
 #include "parser.h"
-#include "utils.h"
 #include <iostream>
 #include <chrono>
 
