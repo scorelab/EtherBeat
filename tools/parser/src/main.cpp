@@ -51,8 +51,8 @@ int main(int argc, const char *argv[]) {
     // Block b2 = parser.getBlock("0xdb16f0d4465f2fd79f10ba539b169404a3e026db1be082e7fd6071b4c5f37db7");
     // b2.print();
 
-    // Block b = parser.getBlock(189154);
-    Block b = parser.getBlock(1);
+    Block b = parser.getBlock(189154);
+    // Block b = parser.getBlock(1);
     b.print();
     // Block b = parser.getBlock(2267598);
     // Block b = parser.getBlock(1795026);

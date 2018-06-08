@@ -28,14 +28,14 @@ struct ParserTest : testing::Test {
 TEST_F(ParserTest, GetBlockByHash) {
     Block b = parser->getBlock("0xe01eb24a18d0c117409a7b8946ed16b4c485ed79746644b89250384ed9bf2fda");;
     std::vector<uint8_t> hash;
-    EXPECT_EQ(b.hash.size(), 32);
+    EXPECT_EQ(b.hash_bytes.size(), 32);
 }
 TEST_F(ParserTest, GetBlockByNumber) {
     Block b = parser->getBlock(189154);;
     std::vector<uint8_t> hash;
-    EXPECT_EQ(b.hash.size(), 32);
+    EXPECT_EQ(b.hash_bytes.size(), 32);
     EXPECT_EQ(b.transactions.size(), 16);
-    EXPECT_EQ(b.ommerHashes.size(), 0);
+    EXPECT_EQ(b.ommerHashes_bytes.size(), 0);
     EXPECT_EQ(b.header.nonce_bytes.size(), 8);
 }
 TEST_F(ParserTest, GetTransactionReceipt) {

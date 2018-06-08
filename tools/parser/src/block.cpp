@@ -33,68 +33,68 @@ void Header::print() {
 }
 void TransactionReceipt::print() {
     printf("blockNumber: %d \n", blockNumber);
-    printf("blockHash: %s \n",  hexStr((unsigned char *)&blockHash[0], blockHash.size()).c_str());
+    printf("blockHash: %s \n",  hexStr((unsigned char *)&blockHash_bytes[0], blockHash_bytes.size()).c_str());
     printf("transactionIndex: %d \n", transactionIndex);
 
-    printf("status: %s \n",  hexStr((unsigned char *)&status[0], status.size()).c_str());
-    printf("cumulativeGasUsed: %d \n",  bytesVectorToInt(cumulativeGasUsed));
-    printf("logsBloom: %s \n",  hexStr((unsigned char *)&logsBloom[0], logsBloom.size()).c_str());
-    printf("transactionHash: %s \n",  hexStr((unsigned char *)&transactionHash[0], transactionHash.size()).c_str());
-    printf("contractAddress: %s \n",  hexStr((unsigned char *)&contractAddress[0], contractAddress.size()).c_str());
-    printf("gasUsed: %d \n", bytesVectorToInt(gasUsed));
+    printf("status: %s \n",  hexStr((unsigned char *)&status_bytes[0], status_bytes.size()).c_str());
+    printf("cumulativeGasUsed: %d \n",  bytesVectorToInt(cumulativeGasUsed_bytes));
+    printf("logsBloom: %s \n",  hexStr((unsigned char *)&logsBloom_bytes[0], logsBloom_bytes.size()).c_str());
+    printf("transactionHash: %s \n",  hexStr((unsigned char *)&transactionHash_bytes[0], transactionHash_bytes.size()).c_str());
+    printf("contractAddress: %s \n",  hexStr((unsigned char *)&contractAddress_bytes[0], contractAddress_bytes.size()).c_str());
+    printf("gasUsed: %d \n", bytesVectorToInt(gasUsed_bytes));
 }
 void Transaction::print() {
-    printf("nonce: %d \n",  bytesVectorToInt(nonce));
+    printf("nonce: %d \n",  bytesVectorToInt(nonce_bytes));
     // printf("nonce: %s \n",  hexStr((unsigned char *)&nonce[0], nonce.size()).c_str());
 
-    printf("gasPrice (too large int): %s\n", hexStr((unsigned char *)&gasPrice[0], gasPrice.size()).c_str());
+    printf("gasPrice (too large int): %s\n", hexStr((unsigned char *)&gasPrice_bytes[0], gasPrice_bytes.size()).c_str());
 
-    printf("gasLimit: %d \n",  bytesVectorToInt(gasLimit));
+    printf("gasLimit: %d \n",  bytesVectorToInt(gasLimit_bytes));
     // printf("gasLimit: %s \n",  hexStr((unsigned char *)&gasLimit[0], gasLimit.size()).c_str());
 
-    printf("to: %s \n",  hexStr((unsigned char *)&to[0], to.size()).c_str());
-    printf("value: %s \n",  hexStr((unsigned char *)&value[0], value.size()).c_str());
-    printf("v: %s \n",  hexStr((unsigned char *)&v[0], v.size()).c_str());
-    printf("r: %s \n",  hexStr((unsigned char *)&r[0], r.size()).c_str());
-    printf("s: %s \n",  hexStr((unsigned char *)&s[0], s.size()).c_str());
-    printf("init: %s \n",  hexStr((unsigned char *)&init[0], init.size()).c_str());
-    printf("from: %s \n",  hexStr((unsigned char *)&from[0], from.size()).c_str());
-    printf("hash: %s \n",  hexStr((unsigned char *)&hash[0], hash.size()).c_str());
+    printf("to: %s \n",  hexStr((unsigned char *)&to_bytes[0], to_bytes.size()).c_str());
+    printf("value: %s \n",  hexStr((unsigned char *)&value_bytes[0], value_bytes.size()).c_str());
+    printf("v: %s \n",  hexStr((unsigned char *)&v_bytes[0], v_bytes.size()).c_str());
+    printf("r: %s \n",  hexStr((unsigned char *)&r_bytes[0], r_bytes.size()).c_str());
+    printf("s: %s \n",  hexStr((unsigned char *)&s_bytes[0], s_bytes.size()).c_str());
+    printf("init: %s \n",  hexStr((unsigned char *)&init_bytes[0], init_bytes.size()).c_str());
+    printf("from: %s \n",  hexStr((unsigned char *)&from_bytes[0], from_bytes.size()).c_str());
+    printf("hash: %s \n",  hexStr((unsigned char *)&hash_bytes[0], hash_bytes.size()).c_str());
 }
 
 
 std::vector<std::uint8_t> Transaction::recoverTxSender() {
     //tx FROM address
-    int chainId = v[0];
+    int chainId = v_bytes[0];
     if(chainId > 0) {
-        chainId = (v[0]-35)/2;
+        chainId = (v_bytes[0]-35)/2;
     }
 
     //RLP encode tx
     std::vector<RLPField> dataFields;
 
     RLPField field_nonce;
-    field_nonce.bytes.insert(field_nonce.bytes.end(), nonce.begin(), nonce.end());
+    field_nonce.bytes.insert(field_nonce.bytes.end(), nonce_bytes.begin(), nonce_bytes.end());
     dataFields.insert(dataFields.end(), field_nonce);
 
     RLPField field_gasPrice;
-    field_gasPrice.bytes.insert(field_gasPrice.bytes.end(), gasPrice.begin(), gasPrice.end());
+    field_gasPrice.bytes.insert(field_gasPrice.bytes.end(), gasPrice_bytes.begin(), gasPrice_bytes.end());
     dataFields.insert(dataFields.end(), field_gasPrice);
 
     RLPField field_gasLimit;
-    field_gasLimit.bytes.insert(field_gasLimit.bytes.end(), gasLimit.begin(), gasLimit.end());
+    field_gasLimit.bytes.insert(field_gasLimit.bytes.end(), gasLimit_bytes.begin(), gasLimit_bytes.end());
     dataFields.insert(dataFields.end(), field_gasLimit);
 
     RLPField field_to;
-    field_to.bytes.insert(field_to.bytes.end(), to.begin(), to.end());
+    field_to.bytes.insert(field_to.bytes.end(), to_bytes.begin(), to_bytes.end());
     dataFields.insert(dataFields.end(), field_to);
 
     RLPField field_value;
-    field_value.bytes.insert(field_value.bytes.end(), value.begin(), value.end());
+    field_value.bytes.insert(field_value.bytes.end(), value_bytes.begin(), value_bytes.end());
     dataFields.insert(dataFields.end(), field_value);
 
     RLPField field_init;
-    field_init.bytes.insert(field_init.bytes.end(), init.begin(), init.end());
+    field_init.bytes.insert(field_init.bytes.end(), init_bytes.begin(), init_bytes.end());
     dataFields.insert(dataFields.end(), field_init);
 
     if (chainId > 0) {
@@ -120,13 +120,13 @@ std::vector<std::uint8_t> Transaction::recoverTxSender() {
 
 
 
-    uint8_t new_v = v[0];
+    uint8_t new_v = v_bytes[0];
     if (chainId > 0) {
             new_v -= (chainId * 2 + 8);
     }
 
 
-    std::vector<uint8_t > public_key = recover(new_v, r, s, txHash);
+    std::vector<uint8_t > public_key = recover(new_v, r_bytes, s_bytes, txHash);
     if (public_key.empty()) {
         return {};
     }
@@ -139,7 +139,7 @@ std::vector<std::uint8_t> Transaction::recoverTxSender() {
 Block::Block(Header header):header(header) {}
 void Block::print() {
     printf("---------- Block : %d ----------\n", bytesVectorToInt(header.number_bytes));
-    printf("hash: %s \n",  hexStr((unsigned char *)&hash[0], hash.size()).c_str());
+    printf("hash: %s \n",  hexStr((unsigned char *)&hash_bytes[0], hash_bytes.size()).c_str());
     header.print();
     printf("----Transactions------\n[\n");
     for(Transaction t : transactions){
@@ -148,7 +148,7 @@ void Block::print() {
         printf("},\n");
     }
     printf("]\n----Uncles------\n");
-    for(std::vector<uint8_t> ommerHash: ommerHashes){
+    for(std::vector<uint8_t> ommerHash: ommerHashes_bytes){
         printf("ommer hash: %s \n",  hexStr((unsigned char *)&ommerHash[0], ommerHash.size()).c_str());
     }
 }

@@ -79,7 +79,7 @@ Block Parser::getBlock(uint64_t blockNumber, std::string blockHash){
 
         // create a new block and add the header
         Block block(h);
-        block.hash = getByteVector(blockHash);
+        block.hash_bytes = getByteVector(blockHash);
 
         // Get block body content
         std::string bodyKey = createBlockBodyKey(blockNumber, blockHash);
@@ -217,25 +217,24 @@ void Parser::updateBody(Block *block, std::vector<uint8_t> contents, RLP & rlp){
         for(i=0; i<rlp[0].numItems(); i++) {
             // todo : check if transaction contains valid number of fields
             Transaction transaction;
-            transaction.raw_tx = createByteVector(contents, rlp[0][i]);
-            transaction.nonce = createByteVector(contents, rlp[0][i][0]);
-            transaction.gasPrice = createByteVector(contents, rlp[0][i][1]);
-            transaction.gasLimit = createByteVector(contents, rlp[0][i][2]);
-            transaction.to = createByteVector(contents, rlp[0][i][3]); // empty for contract creation
-            transaction.value = createByteVector(contents, rlp[0][i][4]);
-            transaction.init = createByteVector(contents, rlp[0][i][5]);
+            transaction.nonce_bytes = createByteVector(contents, rlp[0][i][0]);
+            transaction.gasPrice_bytes = createByteVector(contents, rlp[0][i][1]);
+            transaction.gasLimit_bytes = createByteVector(contents, rlp[0][i][2]);
+            transaction.to_bytes = createByteVector(contents, rlp[0][i][3]); // empty for contract creation
+            transaction.value_bytes = createByteVector(contents, rlp[0][i][4]);
+            transaction.init_bytes = createByteVector(contents, rlp[0][i][5]);
 
-            transaction.v = createByteVector(contents, rlp[0][i][6]);
-            transaction.r = createByteVector(contents, rlp[0][i][7]);
-            transaction.s = createByteVector(contents, rlp[0][i][8]);
+            transaction.v_bytes = createByteVector(contents, rlp[0][i][6]);
+            transaction.r_bytes = createByteVector(contents, rlp[0][i][7]);
+            transaction.s_bytes = createByteVector(contents, rlp[0][i][8]);
 
             // calculate the hash of the transaction
             std::vector<uint8_t> rlp_encoded_tx = rlp[0][i].serializedData();
-            transaction.hash = keccak_256(rlp_encoded_tx);
+            transaction.hash_bytes = keccak_256(rlp_encoded_tx);
 
-            transaction.from = transaction.recoverTxSender();
+            transaction.from_bytes = transaction.recoverTxSender();
 
-            if(transaction.from.size() == 0) {
+            if(transaction.from_bytes.size() == 0) {
                 printf("Block %d Transaction %d Address Not Found\n", bytesVectorToInt(block->header.number_bytes), i+1);
             }
 
@@ -251,7 +250,7 @@ void Parser::updateBody(Block *block, std::vector<uint8_t> contents, RLP & rlp){
             std::vector<uint8_t> ommerHash = createByteVector(contents, rlp[1][i]);
             ommerHashes.insert(ommerHashes.end(), ommerHash);
         }
-        block->ommerHashes = ommerHashes;
+        block->ommerHashes_bytes = ommerHashes;
     }
 
 }
@@ -277,16 +276,16 @@ void Parser::updateTxReceipts(std::vector<TransactionReceipt> *receipts, uint64_
 
         receipt.blockNumber = blockNumber;
         receipt.transactionIndex = i;
-        receipt.blockHash = blockHash;
+        receipt.blockHash_bytes = blockHash;
 
         // get transactions
-        receipt.status = createByteVector(contents, rlp[i][0]);
-        receipt.cumulativeGasUsed = createByteVector(contents, rlp[i][1]);
-        receipt.logsBloom = createByteVector(contents, rlp[i][2]);
-        receipt.transactionHash = createByteVector(contents, rlp[i][3]);
-        receipt.contractAddress = createByteVector(contents, rlp[i][4]);
+        receipt.status_bytes = createByteVector(contents, rlp[i][0]);
+        receipt.cumulativeGasUsed_bytes = createByteVector(contents, rlp[i][1]);
+        receipt.logsBloom_bytes = createByteVector(contents, rlp[i][2]);
+        receipt.transactionHash_bytes = createByteVector(contents, rlp[i][3]);
+        receipt.contractAddress_bytes = createByteVector(contents, rlp[i][4]);
         // receipt.logs; // array, won't consider decoding in this phase
-        receipt.gasUsed = createByteVector(contents, rlp[i][6]);
+        receipt.gasUsed_bytes = createByteVector(contents, rlp[i][6]);
 
         receipts->insert(receipts->end(), receipt);
     }
