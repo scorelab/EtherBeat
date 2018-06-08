@@ -77,6 +77,16 @@ std::string bytesVectorToHexString(std::vector<uint8_t> attribute) {
     return attr_string;
 }
 
+unsigned long bytesVectorToLong(std::vector<uint8_t> bytes_arr){
+    if(bytes_arr.empty())
+        return 0;
+    std::stringstream str;
+    std::string hexGasPrice =  bytesVectorToHexString(bytes_arr);
+    str << hexGasPrice;
+    unsigned long value;
+    str >> std::hex >> value;
+    return value;
+}
 std::vector<uint8_t> getByteVector(std::string byteString){
     std::vector<uint8_t> contents;
     int i;

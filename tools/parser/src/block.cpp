@@ -4,6 +4,7 @@
 #include "block.h"
 #include <vector>
 #include <string>
+#include <sstream>
 
 #include "address_recover.h"
 #include "rlp.h"
@@ -12,55 +13,54 @@
 
 void Header::print() {
     // printf("---------- Block Header : %d ----------\n", bytesVectorToInt(number));
-    printf("parentHash: %s \n",  hexStr((unsigned char *)&parentHash_bytes[0], parentHash_bytes.size()).c_str());
-    printf("sha3Uncles (ommersHash): %s \n",  hexStr((unsigned char *)&sha3Uncles_bytes[0], sha3Uncles_bytes.size()).c_str());
-    printf("beneficiary (miner) : %s \n",  hexStr((unsigned char *)&beneficiary_bytes[0], beneficiary_bytes.size()).c_str());
-    printf("stateRoot: %s \n",  hexStr((unsigned char *)&stateRoot_bytes[0], stateRoot_bytes.size()).c_str());
-    printf("transactionsRoot: %s \n",  hexStr((unsigned char *)&transactionsRoot_bytes[0], transactionsRoot_bytes.size()).c_str());
-    printf("receiptsRoot: %s \n",  hexStr((unsigned char *)&receiptsRoot_bytes[0], receiptsRoot_bytes.size()).c_str());
-    printf("logsBloom: %s \n",  hexStr((unsigned char *)&logsBloom_bytes[0], logsBloom_bytes.size()).c_str());
+    printf("parentHash: %s \n",  getParentHash().c_str());
+    printf("sha3Uncles (ommersHash): %s \n",  getSha3Uncles().c_str());
+    printf("beneficiary (miner) : %s \n",  getBeneficiary().c_str());
+    printf("stateRoot: %s \n",  getStateRoot().c_str());
+    printf("transactionsRoot: %s \n",  getTransactionsRoot().c_str());
+    printf("receiptsRoot: %s \n",  getReceiptsRoot().c_str());
+    printf("logsBloom: %s \n",  getLogsBloom().c_str());
 
-    printf("difficulty: %d \n",  bytesVectorToInt(difficulty_bytes));
-    printf("number: %d \n",  bytesVectorToInt(number_bytes));
-    printf("gasLimit: %d \n",  bytesVectorToInt(gasLimit_bytes));
-    printf("gasUsed: %d \n",  bytesVectorToInt(gasUsed_bytes));
-    printf("timestamp: %d \n",  bytesVectorToInt(timestamp_bytes));
+    printf("difficulty: %d \n",  (int)getDifficulty());
+    printf("number: %d \n",  (int)getNumber());
+    printf("gasLimit: %d \n",  (int)getGasLimit());
+    printf("gasUsed: %d \n",  (int)getGasUsed());
+    printf("timestamp: %lu \n",  getTimestamp());
 
-    printf("mixHash: %s \n",  hexStr((unsigned char *)&mixHash_bytes[0], mixHash_bytes.size()).c_str());
-    printf("nonce: %s \n",  hexStr((unsigned char *)&nonce_bytes[0], nonce_bytes.size()).c_str());
+    printf("mixHash: %s \n",  getMixHash().c_str());
+    printf("nonce: %s \n",  getNonce().c_str());
 
 }
 void TransactionReceipt::print() {
-    printf("blockNumber: %d \n", blockNumber);
-    printf("blockHash: %s \n",  hexStr((unsigned char *)&blockHash_bytes[0], blockHash_bytes.size()).c_str());
-    printf("transactionIndex: %d \n", transactionIndex);
+    printf("blockNumber: %d \n", (int)getBlockNumber());
+    printf("blockHash: %s \n",  getBlockHash().c_str());
+    printf("transactionIndex: %d \n", (int)getTransactionIndex());
 
-    printf("status: %s \n",  hexStr((unsigned char *)&status_bytes[0], status_bytes.size()).c_str());
-    printf("cumulativeGasUsed: %d \n",  bytesVectorToInt(cumulativeGasUsed_bytes));
-    printf("logsBloom: %s \n",  hexStr((unsigned char *)&logsBloom_bytes[0], logsBloom_bytes.size()).c_str());
-    printf("transactionHash: %s \n",  hexStr((unsigned char *)&transactionHash_bytes[0], transactionHash_bytes.size()).c_str());
-    printf("contractAddress: %s \n",  hexStr((unsigned char *)&contractAddress_bytes[0], contractAddress_bytes.size()).c_str());
-    printf("gasUsed: %d \n", bytesVectorToInt(gasUsed_bytes));
+    printf("status: %s \n",  getStatus().c_str());
+    printf("cumulativeGasUsed: %d \n",  (int)getCumulativeGasUsed());
+    printf("logsBloom: %s \n",  getLogsBloom().c_str());
+    printf("transactionHash: %s \n",  getTransactionHash().c_str());
+    printf("contractAddress: %s \n",  getContractAddress().c_str());
+    printf("gasUsed: %d \n", (int)getGasUsed());
 }
 void Transaction::print() {
-    printf("nonce: %d \n",  bytesVectorToInt(nonce_bytes));
+    printf("nonce: %d \n",  (int)getNonce());
     // printf("nonce: %s \n",  hexStr((unsigned char *)&nonce[0], nonce.size()).c_str());
 
-    printf("gasPrice (too large int): %s\n", hexStr((unsigned char *)&gasPrice_bytes[0], gasPrice_bytes.size()).c_str());
+    printf("gasPrice : %s\n", getGasPrice().c_str());
 
-    printf("gasLimit: %d \n",  bytesVectorToInt(gasLimit_bytes));
+    printf("gasLimit: %d \n",  getGasLimit());
     // printf("gasLimit: %s \n",  hexStr((unsigned char *)&gasLimit[0], gasLimit.size()).c_str());
 
-    printf("to: %s \n",  hexStr((unsigned char *)&to_bytes[0], to_bytes.size()).c_str());
-    printf("value: %s \n",  hexStr((unsigned char *)&value_bytes[0], value_bytes.size()).c_str());
-    printf("v: %s \n",  hexStr((unsigned char *)&v_bytes[0], v_bytes.size()).c_str());
-    printf("r: %s \n",  hexStr((unsigned char *)&r_bytes[0], r_bytes.size()).c_str());
-    printf("s: %s \n",  hexStr((unsigned char *)&s_bytes[0], s_bytes.size()).c_str());
-    printf("init: %s \n",  hexStr((unsigned char *)&init_bytes[0], init_bytes.size()).c_str());
-    printf("from: %s \n",  hexStr((unsigned char *)&from_bytes[0], from_bytes.size()).c_str());
-    printf("hash: %s \n",  hexStr((unsigned char *)&hash_bytes[0], hash_bytes.size()).c_str());
+    printf("to: %s \n",  getTo().c_str());
+    printf("value: %s \n",  getValue().c_str());
+    printf("v: %s \n",  getV().c_str());
+    printf("r: %s \n",  getR().c_str());
+    printf("s: %s \n",  getS().c_str());
+    printf("init: %s \n",  getData().c_str());
+    printf("from: %s \n",  getFrom().c_str());
+    printf("hash: %s \n",  getHash().c_str());
 }
-
 
 std::vector<std::uint8_t> Transaction::recoverTxSender() {
     //tx FROM address
@@ -138,7 +138,7 @@ std::vector<std::uint8_t> Transaction::recoverTxSender() {
 Block::Block(Header header):header(header) {}
 void Block::print() {
     printf("---------- Block : %d ----------\n", bytesVectorToInt(header.number_bytes));
-    printf("hash: %s \n",  bytesVectorToHexString(hash_bytes).c_str());
+    printf("hash: %s \n",  getHash().c_str());
     header.print();
     printf("----Transactions------\n[\n");
     for(Transaction t : transactions){
@@ -147,8 +147,9 @@ void Block::print() {
         printf("},\n");
     }
     printf("]\n----Uncles------\n");
-    for(std::vector<uint8_t> ommerHash: ommerHashes_bytes){
-        printf("ommer hash: %s \n",  hexStr((unsigned char *)&ommerHash[0], ommerHash.size()).c_str());
+    std::vector<std::string> ommers = getOmmers();
+    for(std::string ommer: ommers){
+        printf("ommer hash: %s \n",  ommer.c_str());
     }
 }
 

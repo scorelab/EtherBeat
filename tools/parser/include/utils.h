@@ -24,6 +24,9 @@ int hexStringToInt(std::string);
 // assembles a byte vector to its integer notation
 size_t bytesVectorToInt(std::vector<uint8_t> bytes_arr);
 
+// assembles a byte vector to its long notation
+unsigned long bytesVectorToLong(std::vector<uint8_t> bytes_arr);
+
 // assembles a byte vector to its string notation
 std::string bytesVectorToHexString(std::vector<uint8_t> attribute);
 

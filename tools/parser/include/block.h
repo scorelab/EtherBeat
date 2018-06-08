@@ -32,11 +32,11 @@ class Header {
 	    std::string getTransactionsRoot(){return bytesVectorToHexString(transactionsRoot_bytes);};
 	    std::string getReceiptsRoot(){return bytesVectorToHexString(receiptsRoot_bytes);};
 	    std::string getLogsBloom(){return bytesVectorToHexString(logsBloom_bytes);};
-	    std::string getDifficulty(){return bytesVectorToHexString(difficulty_bytes);};
-	    std::string getNumber(){return bytesVectorToHexString(number_bytes);};
-	    std::string getGasLimit(){return bytesVectorToHexString(gasLimit_bytes);};
-	    std::string getGasUsed(){return bytesVectorToHexString(gasUsed_bytes);};
-	    std::string getTimestamp(){return bytesVectorToHexString(timestamp_bytes);};
+	    size_t getDifficulty(){return bytesVectorToInt(difficulty_bytes);};
+		size_t getNumber(){return bytesVectorToInt(number_bytes);};
+		size_t getGasLimit(){return bytesVectorToInt(gasLimit_bytes);};
+		size_t getGasUsed(){return bytesVectorToInt(gasUsed_bytes);};
+		unsigned long getTimestamp(){return bytesVectorToInt(timestamp_bytes);};
 	    std::string getExtraData(){return bytesVectorToHexString(extraData_bytes);};
 	    std::string getMixHash(){return bytesVectorToHexString(mixHash_bytes);};
 	    std::string getNonce(){return bytesVectorToHexString(nonce_bytes);};
@@ -67,13 +67,15 @@ class TransactionReceipt {
         std::vector<std::uint8_t> gasUsed_bytes;
 
         void print();
+        size_t getBlockNumber(){return blockNumber;};
+        size_t getTransactionIndex(){ return transactionIndex;};
 		std::string getBlockHash(){return bytesVectorToHexString(blockHash_bytes);};
 		std::string getStatus(){return bytesVectorToHexString(status_bytes);};
-		std::string getCumulativeGasUsed(){return bytesVectorToHexString(cumulativeGasUsed_bytes);};
+		size_t getCumulativeGasUsed(){return bytesVectorToInt(cumulativeGasUsed_bytes);};
 		std::string getLogsBloom(){return bytesVectorToHexString(logsBloom_bytes);};
 		std::string getTransactionHash(){return bytesVectorToHexString(transactionHash_bytes);};
 		std::string getContractAddress(){return bytesVectorToHexString(contractAddress_bytes);};
-		std::string getGasUsed(){return bytesVectorToHexString(gasUsed_bytes);};
+		size_t getGasUsed(){return bytesVectorToInt(gasUsed_bytes);};
 
 };
 
@@ -96,9 +98,9 @@ class Transaction {
     	void print();
     	std::vector<std::uint8_t> recoverTxSender();
     	// getters
-		std::string getNonce(){return bytesVectorToHexString(nonce_bytes);};
+		int getNonce(){return (int)bytesVectorToInt(nonce_bytes);};
 		std::string getGasPrice(){return bytesVectorToHexString(gasPrice_bytes);};
-		std::string getGasLimit(){return bytesVectorToHexString(gasLimit_bytes);};
+		int getGasLimit(){return (int)bytesVectorToInt(gasLimit_bytes);};
 		std::string getTo(){return bytesVectorToHexString(to_bytes);};
 		std::string getValue(){return bytesVectorToHexString(value_bytes);};
 		std::string getV(){return bytesVectorToHexString(v_bytes);};
@@ -107,6 +109,11 @@ class Transaction {
 		std::string getData(){return bytesVectorToHexString(init_bytes);};
 		std::string getFrom(){return bytesVectorToHexString(from_bytes);};
 		std::string getHash(){return bytesVectorToHexString(hash_bytes);};
+
+		// value in Gwei => 1 Gwei = 10^9 wei
+		// unsigned long getValue(){return bytesVectorToLong(value_bytes);};
+		// gas price in Gwei => 1 Gwei = 10^9 wei
+		// unsigned long getGasPrice(){ return bytesVectorToLong(gasPrice_bytes);};
 };
 
 
