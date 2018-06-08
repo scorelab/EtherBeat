@@ -36,7 +36,7 @@ TEST_F(ParserTest, GetBlockByNumber) {
     EXPECT_EQ(b.hash.size(), 32);
     EXPECT_EQ(b.transactions.size(), 16);
     EXPECT_EQ(b.ommerHashes.size(), 0);
-    EXPECT_EQ(b.header.nonce.size(), 8);
+    EXPECT_EQ(b.header.nonce_bytes.size(), 8);
 }
 TEST_F(ParserTest, GetTransactionReceipt) {
     TransactionReceipt tr = parser->getTransactionReceipt("0xfddd30b69b0c4f918785e83c8b8ddd21fe3e2019a142fc382b88fa5de6c88fa2");

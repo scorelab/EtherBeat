@@ -192,21 +192,21 @@ std::string Parser::createLookupKey(std::string transactionHash) {
 
 void Parser::updateHeader(Header *header, std::vector<uint8_t> contents, RLP & rlp){
 
-    header->parentHash = createByteVector(contents, rlp[0]);
-    header->sha3Uncles = createByteVector(contents, rlp[1]);
-    header->beneficiary = createByteVector(contents, rlp[2]);
-    header->stateRoot = createByteVector(contents, rlp[3]);
-    header->transactionsRoot = createByteVector(contents, rlp[4]);
-    header->receiptsRoot = createByteVector(contents, rlp[5]);
-    header->logsBloom = createByteVector(contents, rlp[6]);
-    header->difficulty = createByteVector(contents, rlp[7]);
-    header->number = createByteVector(contents, rlp[8]);
-    header->gasLimit = createByteVector(contents, rlp[9]);
-    header->gasUsed = createByteVector(contents, rlp[10]);
-    header->timestamp = createByteVector(contents, rlp[11]);
-    header->extraData = createByteVector(contents, rlp[12]);
-    header->mixHash = createByteVector(contents, rlp[13]);
-    header->nonce = createByteVector(contents, rlp[14]);
+    header->parentHash_bytes = createByteVector(contents, rlp[0]);
+    header->sha3Uncles_bytes = createByteVector(contents, rlp[1]);
+    header->beneficiary_bytes = createByteVector(contents, rlp[2]);
+    header->stateRoot_bytes = createByteVector(contents, rlp[3]);
+    header->transactionsRoot_bytes = createByteVector(contents, rlp[4]);
+    header->receiptsRoot_bytes = createByteVector(contents, rlp[5]);
+    header->logsBloom_bytes = createByteVector(contents, rlp[6]);
+    header->difficulty_bytes = createByteVector(contents, rlp[7]);
+    header->number_bytes = createByteVector(contents, rlp[8]);
+    header->gasLimit_bytes = createByteVector(contents, rlp[9]);
+    header->gasUsed_bytes = createByteVector(contents, rlp[10]);
+    header->timestamp_bytes = createByteVector(contents, rlp[11]);
+    header->extraData_bytes = createByteVector(contents, rlp[12]);
+    header->mixHash_bytes = createByteVector(contents, rlp[13]);
+    header->nonce_bytes = createByteVector(contents, rlp[14]);
 
 }
 
@@ -236,7 +236,7 @@ void Parser::updateBody(Block *block, std::vector<uint8_t> contents, RLP & rlp){
             transaction.from = transaction.recoverTxSender();
 
             if(transaction.from.size() == 0) {
-                printf("Block %d Transaction %d Address Not Found\n", bytesVectorToInt(block->header.number), i+1);
+                printf("Block %d Transaction %d Address Not Found\n", bytesVectorToInt(block->header.number_bytes), i+1);
             }
 
             block->transactions.insert(block->transactions.end(), transaction);
@@ -315,7 +315,7 @@ Account Parser::getAccount(std::string address, uint64_t blockHeight) {
     // todo : not implemented. has to implement using merkel patricia tree
     Block b = getBlock(blockHeight);
 
-    if(!b.header.stateRoot.empty()){
+    if(!b.header.stateRoot_bytes.empty()){
 
         // std::vector<uint8_t > raw_key = getByteVector(address);
         // std::vector<uint8_t > hash_key = keccak_256(raw_key);
@@ -324,7 +324,7 @@ Account Parser::getAccount(std::string address, uint64_t blockHeight) {
         std::string value;
 
         // Get byte string of state root
-        std::string stateRoot (b.header.stateRoot.begin(), b.header.stateRoot.end());
+        std::string stateRoot (b.header.stateRoot_bytes.begin(), b.header.stateRoot_bytes.end());
         leveldb::Status status = db->Get(leveldb::ReadOptions(), stateRoot, &value);
 
         if (status.ok()) {

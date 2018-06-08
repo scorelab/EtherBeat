@@ -52,14 +52,14 @@ int main(int argc, const char *argv[]) {
     // b2.print();
 
     // Block b = parser.getBlock(189154);
-    // Block b = parser.getBlock(1);
-    // b.print();
+    Block b = parser.getBlock(1);
+    b.print();
     // Block b = parser.getBlock(2267598);
     // Block b = parser.getBlock(1795026);
     // b.print();
 
     TransactionReceipt tr = parser.getTransactionReceipt("0xfddd30b69b0c4f918785e83c8b8ddd21fe3e2019a142fc382b88fa5de6c88fa2");
-    // tr.print();
+    tr.print();
     // testing account
     /*
      * // TESTING PURPOSE
