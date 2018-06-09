@@ -84,7 +84,7 @@ class Transaction {
     public:
         std::vector<std::uint8_t> nonce_bytes;
     	std::vector<std::uint8_t> gasPrice_bytes;
-    	std::vector<std::uint8_t> gasLimit_bytes;
+    	std::vector<std::uint8_t> gasLimit_bytes; // gas limit*gas price = max tx fee
     	std::vector<std::uint8_t> to_bytes; // No TO address is getting for contact creation transactions
     	std::vector<std::uint8_t> value_bytes; // in wei (1 ETH = 10^18 wei)
     	std::vector<std::uint8_t> v_bytes;
@@ -114,6 +114,17 @@ class Transaction {
 		// unsigned long getValue(){return bytesVectorToLong(value_bytes);};
 		// gas price in Gwei => 1 Gwei = 10^9 wei
 		// unsigned long getGasPrice(){ return bytesVectorToLong(gasPrice_bytes);};
+
+		std::string getType(){
+			if (to_bytes.empty() && !init_bytes.empty()){
+				return "contract creation";
+			} else if(!init_bytes.empty()){
+				return "message call"; // todo : this returns external--->contract txes as message calls. is it okay?
+			}else{
+				return "transaction call";
+			}
+
+		}
 };
 
 

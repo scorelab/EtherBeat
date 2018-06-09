@@ -22,6 +22,21 @@ int main(int argc, const char *argv[]) {
 
     Parser parser(db);
 
+    int i;
+    for(i=1;i<200000;i++) {
+        Block b = parser.getBlock(i);
+
+        int j;
+        for(j=0;j<b.transactions.size();j++){
+            // if (b.transactions[j].getType() == "message call"){
+            if (b.transactions[j].getGasLimit() == 0){
+                b.print();
+                goto end_section;
+            }
+
+        }
+    }
+    end_section:
     // TESTING PURPOSE
     /*
     std::chrono::milliseconds ms1 = std::chrono::duration_cast<std::chrono::milliseconds>(
@@ -52,8 +67,8 @@ int main(int argc, const char *argv[]) {
     // b2.print();
 
     // Block b = parser.getBlock(189154);
-    Block b = parser.getBlock(55);
-    b.print();
+    // Block b = parser.getBlock(55);
+    // b.print();
     // Block b = parser.getBlock(2267598);
     // Block b = parser.getBlock(1795026);
     // b.print();
