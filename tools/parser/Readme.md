@@ -13,6 +13,9 @@ Install the below dependencies in your environment.
 ## Running the project
  - ./run.sh
 
+## Create a library and using it in your project
+ - ./build_library.sh
+
 ## Useful Links
  - Ethereum Blockchain 
  https://www.hashhack.it/posts/source-r-ethereum
