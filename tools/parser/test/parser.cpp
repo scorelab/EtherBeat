@@ -3,24 +3,17 @@
  *
  */
 #include <gtest/gtest.h>
-#include "leveldb/db.h"
 #include "parser.h"
 
 
 struct ParserTest : testing::Test {
     Parser* parser;
-    leveldb::DB* db;
     ParserTest() {
-        leveldb::Options options;
-        options.create_if_missing = true;
-        leveldb::Status status = leveldb::DB::Open(options, "../test/sample/chaindata", &db);
-
-        parser = new Parser(db);
+        parser = new Parser("../test/sample/chaindata");
     }
 
     ~ParserTest() {
         delete parser;
-        delete db;
     }
 };
 

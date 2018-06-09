@@ -1,42 +1,15 @@
 /*
  * Created by prabushitha on 5/6/18.
 */
-#include "leveldb/db.h"
+
 #include "parser.h"
 #include <iostream>
 #include <chrono>
 
 int main(int argc, const char *argv[]) {
-    // connect to leveldb
-    leveldb::DB* db;
-    leveldb::Options options;
-    options.create_if_missing = true;
-    leveldb::Status status = leveldb::DB::Open(options, "/home/prabushitha/.ethereum/rinkeby/geth/chaindata", &db);
 
-    // when error occured while connecting to db
-    if (!status.ok()){
-        std::cerr << status.ToString() << std::endl;
-        delete db;
-        return 0;
-    }
+    Parser parser("/home/prabushitha/.ethereum/rinkeby/geth/chaindata");
 
-    Parser parser(db);
-
-    int i;
-    for(i=1;i<200000;i++) {
-        Block b = parser.getBlock(i);
-
-        int j;
-        for(j=0;j<b.transactions.size();j++){
-            // if (b.transactions[j].getType() == "message call"){
-            if (b.transactions[j].getGasLimit() == 0){
-                b.print();
-                goto end_section;
-            }
-
-        }
-    }
-    end_section:
     // TESTING PURPOSE
     /*
     std::chrono::milliseconds ms1 = std::chrono::duration_cast<std::chrono::milliseconds>(
@@ -66,9 +39,9 @@ int main(int argc, const char *argv[]) {
     // Block b2 = parser.getBlock("0xdb16f0d4465f2fd79f10ba539b169404a3e026db1be082e7fd6071b4c5f37db7");
     // b2.print();
 
-    // Block b = parser.getBlock(189154);
+    Block b = parser.getBlock(189154);
     // Block b = parser.getBlock(55);
-    // b.print();
+    b.print();
     // Block b = parser.getBlock(2267598);
     // Block b = parser.getBlock(1795026);
     // b.print();
@@ -84,7 +57,6 @@ int main(int argc, const char *argv[]) {
 
     }*/
 
-    delete db;
     return 1;
 }
 // 0.000000020000000000

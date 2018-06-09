@@ -8,7 +8,15 @@
 
 // todo : Resize vectors (header attributes, block attributes, transaction attributes) to the required amount of memory
 
-Parser::Parser(leveldb::DB *db):db(db) {}
+Parser::Parser(std::string db_path) {
+    // leveldb::DB* db;
+    options.create_if_missing = true;
+    leveldb::Status status = leveldb::DB::Open(options, db_path, &db);
+    if (!status.ok()){
+        delete db;
+        throw;
+    }
+}
 /*
 *
 * BLOCK RELATED PARSING
