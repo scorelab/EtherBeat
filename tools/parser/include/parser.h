@@ -11,6 +11,8 @@ class Parser {
 
 
     leveldb::DB * db;
+    leveldb::Options options;
+
     uint8_t headerPrefix[1] = {104}; // h : headerPrefix + num (uint64 big endian) + hash -> header
     uint8_t numSuffix[1] = {110}; // n : headerPrefix + num (uint64 big endian) + numSuffix -> hash
 
@@ -22,7 +24,10 @@ class Parser {
     uint8_t lookupPrefix[1] = {108};  // l : lookupPrefix + hash -> transaction/receipt lookup metadata (BlockHash, BlockIndex, Index)
 
     public:
-        Parser(leveldb::DB *);
+        Parser(std::string db_path);
+        ~Parser() {
+            delete db;
+        }
         Block getBlock(uint64_t blockNumber);
         Block getBlock(std::string blockHashHex);
         TransactionReceipt getTransactionReceipt(std::string transactionHash);
