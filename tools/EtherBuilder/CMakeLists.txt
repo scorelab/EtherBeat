@@ -10,9 +10,8 @@ set(CMAKE_CXX_STANDARD 11)
 link_directories(
         ../parser/build
 )
-include_directories(../parser/include)
 
 # create the executable
 add_executable(${PROJECT_NAME} main.cpp)
 
-target_link_libraries (${PROJECT_NAME} leveldb cryptopp secp256k1 gtest ethereum_parser ${BASE_LIBS})
+target_link_libraries (${PROJECT_NAME} leveldb cryptopp secp256k1 gtest ethereum_parser sqlite3 ${BASE_LIBS})
