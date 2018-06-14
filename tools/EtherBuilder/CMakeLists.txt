@@ -10,6 +10,7 @@ set(CMAKE_CXX_STANDARD 11)
 link_directories(
         ../parser/build
 )
+include_directories(../parser/include include)
 
 # create the executable
 add_executable(${PROJECT_NAME} main.cpp)

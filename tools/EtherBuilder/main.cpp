@@ -1,4 +1,5 @@
 #include "parser.h"
+#include "block_store.h"
 #include <sqlite3.h>
 #include <iostream>
 #include <stdio.h>
@@ -15,6 +16,8 @@ int main() {
     } else {
         fprintf(stderr, "Opened database successfully\n");
     }
+    // create database
+    createRDBMSSchema(db);
 
 
     Parser p("/home/prabushitha/.ethereum/rinkeby/geth/chaindata");
@@ -22,6 +25,7 @@ int main() {
     Block b = p.getBlock(55);
     // b.print();
 
+    storeBlockInRDBMS(db, b);
 
     sqlite3_close(db);
     return 0;
