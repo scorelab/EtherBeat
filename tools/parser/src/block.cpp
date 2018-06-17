@@ -47,13 +47,13 @@ void Transaction::print() {
     printf("nonce: %d \n",  (int)getNonce());
     // printf("nonce: %s \n",  hexStr((unsigned char *)&nonce[0], nonce.size()).c_str());
 
-    printf("gasPrice : %s\n", getGasPrice().c_str());
+    printf("gasPrice : %f\n", getGasPrice());
 
     printf("gasLimit: %d \n",  getGasLimit());
     // printf("gasLimit: %s \n",  hexStr((unsigned char *)&gasLimit[0], gasLimit.size()).c_str());
 
     printf("to: %s \n",  getTo().c_str());
-    printf("value: %s \n",  getValue().c_str());
+    printf("value: %f \n",  getValue());
     printf("v: %s \n",  getV().c_str());
     printf("r: %s \n",  getR().c_str());
     printf("s: %s \n",  getS().c_str());
