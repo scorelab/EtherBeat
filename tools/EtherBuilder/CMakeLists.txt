@@ -15,4 +15,4 @@ include_directories(../parser/include include)
 # create the executable
 add_executable(${PROJECT_NAME} main.cpp)
 
-target_link_libraries (${PROJECT_NAME} leveldb cryptopp secp256k1 gtest ethereum_parser sqlite3 ${BASE_LIBS})
+target_link_libraries (${PROJECT_NAME} rocksdb leveldb cryptopp secp256k1 gtest ethereum_parser sqlite3 ${BASE_LIBS})
