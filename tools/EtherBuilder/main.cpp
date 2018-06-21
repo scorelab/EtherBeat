@@ -60,10 +60,10 @@ int main() {
     Parser p("/home/prabushitha/.ethereum/rinkeby/geth/chaindata");
 
     // lets store blocks!!!
-    size_t max_blocks = info.lastBlockId+1000;
+    size_t max_blocks = info.lastBlockId+100000;
     for(size_t i=info.lastBlockId; i<max_blocks; i++) {
         Block b = p.getBlock(i);
-        storeBlockInRDBMS(db_sqlite, info, b);
+        storeBlockInRDBMS(db_sqlite, info, p, b);
     }
     printf("Next block id: %d \nNext Tx id: %d \n", info.lastBlockId, info.lastTxId);
 

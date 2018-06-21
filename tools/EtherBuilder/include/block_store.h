@@ -68,6 +68,7 @@ void createRDBMSSchema(sqlite3 *db) {
     std::string txTable = "DROP TABLE IF EXISTS Tx;" \
     "CREATE TABLE IF NOT EXISTS Tx("  \
              "id INT PRIMARY KEY     NOT NULL," \
+             "tx_type          VARCHAR," \
              "nonce           INT," \
              "gasPrice        REAL," \
              "gasLimit        INT," \
@@ -80,6 +81,20 @@ void createRDBMSSchema(sqlite3 *db) {
              "sender          VARCHAR," \
              "hash            VARCHAR NOT NULL);";
 
+    std::string txReceiptTable = "DROP TABLE IF EXISTS Txreceipt;" \
+    "CREATE TABLE IF NOT EXISTS Txreceipt("  \
+             "id INT PRIMARY KEY     NOT NULL," \
+             "txHash          VARCHAR NOT NULL," \
+             "blockHash          VARCHAR NOT NULL," \
+             "blockNumber           INT," \
+             "transactionIndex        INT," \
+             "status        VARCHAR," \
+             "gasUsed        INT," \
+             "cumulativeGasUsed           REAL," \
+             "contractAddress           VARCHAR," \
+             "logsBloom           VARCHAR);";
+
+
     std::string blocktxTable = "DROP TABLE IF EXISTS Blocktx;" \
     "CREATE TABLE IF NOT EXISTS Blocktx("  \
              "blockId INT NOT NULL," \
@@ -88,8 +103,10 @@ void createRDBMSSchema(sqlite3 *db) {
              "FOREIGN KEY (txId) REFERENCES Tx(id)," \
              "PRIMARY KEY (blockId, txId));" ;
 
+
+
     std::stringstream ss;
-    ss << blockTable << txTable << blocktxTable;
+    ss << blockTable << txTable << txReceiptTable << blocktxTable;
     std::string sql = ss.str();
 
     /* Execute SQL statement */
@@ -122,9 +139,10 @@ std::string createBlockSql(Block b) {
 }
 
 std::string createTxSql(Transaction transaction, size_t blockId, size_t txId) {
-    std::string tx_sql = "INSERT INTO Tx (id, nonce, gasPrice, gasLimit, receiver, value, v_val, r_val, s_val, init, sender, hash ) "  \
+    std::string tx_sql = "INSERT INTO Tx (id, tx_type, nonce, gasPrice, gasLimit, receiver, value, v_val, r_val, s_val, init, sender, hash ) "  \
          "VALUES (" \
                     "" + std::to_string(txId)+ "," \
+                    "'"+ transaction.getType()+ "'," \
                     ""+ std::to_string(transaction.getNonce())+ "," \
                     ""+  std::to_string(transaction.getGasPrice())+ "," \
                     ""+ std::to_string(transaction.getGasLimit())+ "," \
@@ -146,21 +164,43 @@ std::string createTxSql(Transaction transaction, size_t blockId, size_t txId) {
     return tx_sql+blocktx_sql;
 }
 
-void storeBlockInRDBMS(sqlite3 *db, struct BuilderInfo &info, Block block){
+std::string createTxReceiptSql(TransactionReceipt receipt, size_t txId) {
+    std::string receipt_sql = "INSERT INTO Txreceipt (id , txHash, blockHash, blockNumber, transactionIndex, status, gasUsed, cumulativeGasUsed, contractAddress, logsBloom) "  \
+         "VALUES (" \
+                    "" + std::to_string(txId)+ "," \
+                    "'"+ receipt.getTransactionHash()+ "'," \
+                    "'"+ receipt.getBlockHash()+ "'," \
+                    ""+ std::to_string(receipt.getBlockNumber())+ "," \
+                    ""+  std::to_string(receipt.getTransactionIndex())+ "," \
+                    "'"+ receipt.getStatus() + "'," \
+                    ""+  std::to_string(receipt.getGasUsed())+ "," \
+                    ""+  std::to_string(receipt.getCumulativeGasUsed())+ "," \
+                    "'"+ receipt.getContractAddress()+ "'," \
+                    "'"+ receipt.getLogsBloom()+ "'); " ;
+
+    return receipt_sql;
+}
+
+void storeBlockInRDBMS(sqlite3 *db, struct BuilderInfo &info, Parser &parser, Block block){
     std::string db_sql = createBlockSql(block);
 
 
     std::string transactions_sql = "";
+    std::string receipts_sql = "";
     int i;
     for(i=0;i<block.transactions.size(); i++) {
         Transaction transaction = block.transactions[i];
         std::string tx_sql = createTxSql(transaction, info.lastBlockId, info.lastTxId);
         transactions_sql = transactions_sql+tx_sql;
+
+        TransactionReceipt receipt = parser.getTransactionReceipt(transaction.getHash());
+        std::string tx_receipt_sql = createTxReceiptSql(receipt, info.lastTxId);
+        receipts_sql = receipts_sql+tx_receipt_sql;
         info.lastTxId++;
     }
 
     /* Execute SQL statement */
-    int isQuerySuccess = run_sql_query(db, db_sql+transactions_sql, "Block "+std::to_string(block.header.getNumber())+ " insertion");
+    int isQuerySuccess = run_sql_query(db, db_sql+transactions_sql+receipts_sql, "Block "+std::to_string(block.header.getNumber())+ " insertion");
 
     if(isQuerySuccess) {
         info.lastBlockId++;
