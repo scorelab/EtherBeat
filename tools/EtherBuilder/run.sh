@@ -12,10 +12,10 @@ make
 
 printf "Build Finish\n-----------------------------------------------\nProgram Started \n-----------------------------------------------\n\n"
 
-rm -R ../data/dbrocks
-rm -R ../data/dbsqlite
+rm -R /tmp/dbrocks
+rm -R /tmp/dbsqlite
 
-mkdir ../data/dbrocks
-mkdir ../data/dbsqlite
+mkdir /tmp/dbrocks
+mkdir /tmp/dbsqlite
 
 ./EtherBuilder
