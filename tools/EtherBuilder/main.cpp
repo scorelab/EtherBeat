@@ -1,6 +1,5 @@
 #include "parser.h"
 #include "block_store.h"
-#include "rocksdb/db.h"
 #include <sqlite3.h>
 #include <iostream>
 #include <stdio.h>
@@ -9,7 +8,7 @@
 int main() {
     // Connect to SQLite
     sqlite3 *db_sqlite;
-    int rc = sqlite3_open("/tmp/dbsqlite/ethereum_blockchain.db", &db_sqlite);
+    int rc = sqlite3_open("../data/dbsqlite/ethereum_blockchain.db", &db_sqlite);
 
     if( rc ) {
         fprintf(stderr, "SQLite db failed : %s\n", sqlite3_errmsg(db_sqlite));
@@ -22,7 +21,7 @@ int main() {
     rocksdb::DB* db_rocks;
     rocksdb::Options options;
     options.create_if_missing = true;
-    rocksdb::Status status = rocksdb::DB::Open(options, "/tmp/dbrocks", &db_rocks);
+    rocksdb::Status status = rocksdb::DB::Open(options, "../data/dbrocks", &db_rocks);
     if(status.ok()){
         printf("Rocksdb connected\n");
     }else{
@@ -59,11 +58,12 @@ int main() {
 
     Parser p("/home/prabushitha/.ethereum/rinkeby/geth/chaindata");
 
+    printf("Initial id: %d \nInitial Tx id: %d \n", info.lastBlockId, info.lastTxId);
     // lets store blocks!!!
-    size_t max_blocks = info.lastBlockId+100000;
+    size_t max_blocks = info.lastBlockId+100;
     for(size_t i=info.lastBlockId; i<max_blocks; i++) {
         Block b = p.getBlock(i);
-        storeBlockInRDBMS(db_sqlite, info, p, b);
+        storeBlockInRDBMS(db_sqlite, db_rocks, info, p, b); // db_rocks
     }
     printf("Next block id: %d \nNext Tx id: %d \n", info.lastBlockId, info.lastTxId);
 

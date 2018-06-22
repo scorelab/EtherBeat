@@ -2,3 +2,4 @@
 .directory
 cmake-build-debug
 build
+data

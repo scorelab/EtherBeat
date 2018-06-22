@@ -36,3 +36,15 @@ create a directory for rocksdb
 ### Running Builder
 
 `./run.sh`
+
+
+## Todo list
+
+1. Store Blocks, Transactions, Transaction Receipts in 3 sqlite tables (done)
+2. Store Transaction id's related to a block in sqlite table (done)
+3. Store Accounts in Sqlite
+
+3. Block hash to block id (same as number) mapping in rocksdb
+4. Transaction hash to transaction id mapping in rocksdb
+5. Store Account to Accountid mapping in rocksdb
+6. Store Transaction From-To addresses like a graph in sqlite or rocksdb
