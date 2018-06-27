@@ -33,23 +33,27 @@ int main() {
 
     // get last info
     std::string lastBlockId;
-    rocksdb::Status s1 = db_rocks->Get(rocksdb::ReadOptions(), info.INFO_PREFIX_LAST_BLOCKID, &lastBlockId);
+    rocksdb::Status s1 = db_rocks->Get(rocksdb::ReadOptions(), info.INFO_PREFIX_NEXT_BLOCKID, &lastBlockId);
     std::string lastTxId;
-    rocksdb::Status s2 = db_rocks->Get(rocksdb::ReadOptions(), info.INFO_PREFIX_LAST_TXID, &lastTxId);
+    rocksdb::Status s2 = db_rocks->Get(rocksdb::ReadOptions(), info.INFO_PREFIX_NEXT_TXID, &lastTxId);
+    std::string lastAddressId;
+    rocksdb::Status s3 = db_rocks->Get(rocksdb::ReadOptions(), info.INFO_PREFIX_NEXT_ADDRESSID, &lastAddressId);
 
-    if (s1.ok() && s2.ok()) {
+    if (s1.ok() && s2.ok() && s3.ok()) {
         printf("Rocks last %s\n Rocks last tx %s\n", lastBlockId.c_str(), lastTxId.c_str());
-        info.lastBlockId = (size_t)std::stoi( lastBlockId );
-        info.lastTxId = (size_t)std::stoi( lastTxId );
+        info.nextBlockId = (size_t)std::stoi( lastBlockId );
+        info.nextTxId = (size_t)std::stoi( lastTxId );
+        info.nextAddressId = (size_t)std::stoi( lastAddressId );
 
     }else {
         printf("keys not found \n");
-        info.lastBlockId = 1;
-        info.lastTxId = 1;
+        info.nextBlockId = 1;
+        info.nextTxId = 1;
+        info.nextAddressId = 1;
     }
 
     // if the value are set to initial values, we need to start from the beginning.
-    if (info.lastBlockId == 1 && info.lastTxId == 1) {
+    if (info.nextBlockId == 1 && info.nextTxId == 1) {
         // create database tables
         createRDBMSSchema(db_sqlite);
     }
@@ -58,18 +62,26 @@ int main() {
 
     Parser p("/home/prabushitha/.ethereum/rinkeby/geth/chaindata");
 
-    printf("Initial id: %d \nInitial Tx id: %d \n", info.lastBlockId, info.lastTxId);
+
+    //printf("Initial id: %d \nInitial Tx id: %d \n", info.nextBlockId, info.nextTxId);
+    std::cout << "starting block id \t" << info.nextBlockId << std::endl;
+    std::cout << "starting tx id    \t" << info.nextTxId << std::endl;
+    std::cout << "starting addr id  \t" << info.nextAddressId << std::endl;
     // lets store blocks!!!
-    size_t max_blocks = info.lastBlockId+1000;
-    for(size_t i=info.lastBlockId; i<max_blocks; i++) {
+    size_t max_blocks = info.nextBlockId+100000;
+    for(size_t i=info.nextBlockId; i<max_blocks; i++) {
         Block b = p.getBlock(i);
         storeBlockInRDBMS(db_sqlite, db_rocks, info, p, b); // db_rocks
     }
-    printf("Next block id: %d \nNext Tx id: %d \n", info.lastBlockId, info.lastTxId);
+    std::cout << "-------------------------------------" << std::endl;
+    std::cout << "next block id \t" << info.nextBlockId << std::endl;
+    std::cout << "next tx id    \t" << info.nextTxId << std::endl;
+    std::cout << "next addr id  \t" << info.nextAddressId << std::endl;
+    // printf("Next block id: %d \nNext Tx id: %d \n", info.nextBlockId, info.nextTxId);
 
     // save last ids
-    s1 = db_rocks->Put(rocksdb::WriteOptions(), info.INFO_PREFIX_LAST_BLOCKID, std::to_string(info.lastBlockId));
-    s2 = db_rocks->Put(rocksdb::WriteOptions(), info.INFO_PREFIX_LAST_TXID, std::to_string(info.lastTxId));
+    s1 = db_rocks->Put(rocksdb::WriteOptions(), info.INFO_PREFIX_NEXT_BLOCKID, std::to_string(info.nextBlockId));
+    s2 = db_rocks->Put(rocksdb::WriteOptions(), info.INFO_PREFIX_NEXT_TXID, std::to_string(info.nextTxId));
     // close databases
     sqlite3_close(db_sqlite);
     delete db_rocks;
