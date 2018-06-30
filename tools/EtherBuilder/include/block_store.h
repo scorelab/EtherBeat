@@ -129,83 +129,121 @@ void createRDBMSSchema(sqlite3 *db) {
     run_sql_query(db, sql, "Table Creation");
 }
 
-std::string createBlockSql(Block b) {
+void bindToBlockSql(sqlite3_stmt * stmt, Block b) {
 
-    std::string block_sql = "INSERT INTO block (id, hash, parentHash, sha3Uncles, beneficiary, stateRoot, transactionsRoot, receiptsRoot, logsBloom, difficulty, gasLimit, gasUsed, timestamp, extraData, mixHash, nonce ) "  \
-         "VALUES (" \
-                    "" + std::to_string(b.header.getNumber())+ "," \
-                    "'"+ b.getHash()+ "'," \
-                    "'"+ b.header.getParentHash()+ "'," \
-                    "'"+ b.header.getSha3Uncles()+ "'," \
-                    "'"+ b.header.getBeneficiary()+ "'," \
-                    "'"+ b.header.getStateRoot()+ "'," \
-                    "'"+ b.header.getTransactionsRoot()+ "'," \
-                    "'"+ b.header.getReceiptsRoot()+ "'," \
-                    "'"+ b.header.getLogsBloom()+ "'," \
-                    "" + std::to_string(b.header.getDifficulty())+ "," \
-                    "" + std::to_string(b.header.getGasLimit())+ "," \
-                    "" + std::to_string(b.header.getGasUsed())+ "," \
-                    "datetime("+ std::to_string(b.header.getTimestamp())+ ", 'unixepoch', 'localtime')," \
-                    "'"+ b.header.getExtraData()+ "'," \
-                    "'"+ b.header.getMixHash()+ "'," \
-                    "'"+ b.header.getNonce() + "'" \
-                  "); " ;
+    std::string hash = b.getHash();
+    std::string parentHash = b.header.getParentHash();
+    std::string sha3Uncles = b.header.getSha3Uncles();
+    std::string beneficiary = b.header.getBeneficiary();
+    std::string stateRoot = b.header.getStateRoot();
+    std::string transactionsRoot = b.header.getTransactionsRoot();
+    std::string receiptsRoot = b.header.getReceiptsRoot();
+    std::string logsBloom = b.header.getLogsBloom();
+    std::string extraData = b.header.getExtraData();
+    std::string mixHash = b.header.getMixHash();
+    std::string nonce = b.header.getNonce();
 
-    return block_sql;
+    sqlite3_bind_int64(stmt, 1, b.header.getNumber());
+    sqlite3_bind_text(stmt, 2,  hash.c_str(), strlen(hash.c_str()), 0);
+    sqlite3_bind_text(stmt, 3,  parentHash.c_str(), strlen(parentHash.c_str()), 0);
+    sqlite3_bind_text(stmt, 4,  sha3Uncles.c_str(), strlen(sha3Uncles.c_str()), 0);
+    sqlite3_bind_text(stmt, 5,  beneficiary.c_str(), strlen(beneficiary.c_str()), 0);
+    sqlite3_bind_text(stmt, 6,  stateRoot.c_str(), strlen(stateRoot.c_str()), 0);
+    sqlite3_bind_text(stmt, 7,  transactionsRoot.c_str(), strlen(transactionsRoot.c_str()), 0);
+    sqlite3_bind_text(stmt, 8,  receiptsRoot.c_str(), strlen(receiptsRoot.c_str()), 0);
+    sqlite3_bind_text(stmt, 9,  logsBloom.c_str(), strlen(logsBloom.c_str()), 0);
+
+    sqlite3_bind_int(stmt, 10, b.header.getDifficulty());
+    sqlite3_bind_int(stmt, 11, b.header.getGasLimit());
+    sqlite3_bind_int(stmt, 12, b.header.getGasUsed());
+    sqlite3_bind_double(stmt, 13, (double) b.header.getTimestamp());
+
+    sqlite3_bind_text(stmt, 14,  extraData.c_str(), strlen(extraData.c_str()), 0);
+    sqlite3_bind_text(stmt, 15,  mixHash.c_str(), strlen(mixHash.c_str()), 0);
+    sqlite3_bind_text(stmt, 16,  nonce.c_str(), strlen(nonce.c_str()), 0);
+
+    sqlite3_step(stmt);
+    sqlite3_reset(stmt);
+    sqlite3_clear_bindings(stmt);
 }
 
-std::string createTxSql(Transaction transaction, size_t blockId, size_t txId) {
-    std::string tx_sql = "INSERT INTO tx (id, tx_type, nonce, gasPrice, gasLimit, receiver, value, v_val, r_val, s_val, init, sender, hash ) "  \
-         "VALUES (" \
-                    "" + std::to_string(txId)+ "," \
-                    "'"+ transaction.getType()+ "'," \
-                    ""+ std::to_string(transaction.getNonce())+ "," \
-                    ""+  std::to_string(transaction.getGasPrice())+ "," \
-                    ""+ std::to_string(transaction.getGasLimit())+ "," \
-                    "'"+ transaction.getTo()+ "'," \
-                    ""+  std::to_string(transaction.getValue())+ "," \
-                    "'"+ transaction.getV()+ "'," \
-                    "'"+ transaction.getR()+ "'," \
-                    "'"+ transaction.getS()+ "'," \
-                    "'"+ transaction.getData()+ "'," \
-                    "'"+ transaction.getFrom()+ "'," \
-                    "'"+ transaction.getHash()+ "'" \
-                  "); " ;
-    std::string blocktx_sql = "INSERT INTO blocktx (blockId, txId) "  \
-         "VALUES (" \
-            "" + std::to_string(blockId)+ "," \
-            "" + std::to_string(txId)+ "" \
-         "); " ;
+void bindToTxSql(sqlite3_stmt * stmt, Transaction transaction, size_t blockId, size_t txId) {
 
-    return tx_sql+blocktx_sql;
+    std::string type = transaction.getType();
+    std::string to = transaction.getTo();
+    std::string v = transaction.getV();
+    std::string r = transaction.getR();
+    std::string s = transaction.getS();
+    std::string data = transaction.getData();
+    std::string from = transaction.getFrom();
+    std::string hash = transaction.getHash();
+
+    sqlite3_bind_int64(stmt, 1, txId);
+    sqlite3_bind_text(stmt, 2,  type.c_str(), strlen(type.c_str()), 0);
+
+    sqlite3_bind_int(stmt, 3, transaction.getNonce());
+    sqlite3_bind_double(stmt, 4,  transaction.getValue());
+    sqlite3_bind_int(stmt, 5,  transaction.getGasLimit());
+
+    sqlite3_bind_text(stmt, 6,  to.c_str(), strlen(to.c_str()), 0);
+    sqlite3_bind_text(stmt, 7,  type.c_str(), strlen(type.c_str()), 0);
+    sqlite3_bind_text(stmt, 8,  v.c_str(), strlen(v.c_str()), 0);
+    sqlite3_bind_text(stmt, 9,  r.c_str(), strlen(r.c_str()), 0);
+    sqlite3_bind_text(stmt, 10,  s.c_str(), strlen(s.c_str()), 0);
+    sqlite3_bind_text(stmt, 11,  data.c_str(), strlen(data.c_str()), 0);
+    sqlite3_bind_text(stmt, 12,  from.c_str(), strlen(from.c_str()), 0);
+    sqlite3_bind_text(stmt, 13,  hash.c_str(), strlen(hash.c_str()), 0);
+
+
+    sqlite3_step(stmt);
+    sqlite3_reset(stmt);
+    sqlite3_clear_bindings(stmt);
+
 }
 
-std::string createTxReceiptSql(TransactionReceipt receipt, size_t txId) {
-    std::string receipt_sql = "INSERT INTO txreceipt (id , txHash, blockHash, blockNumber, transactionIndex, status, gasUsed, cumulativeGasUsed, contractAddress, logsBloom) "  \
-         "VALUES (" \
-                    "" + std::to_string(txId)+ "," \
-                    "'"+ receipt.getTransactionHash()+ "'," \
-                    "'"+ receipt.getBlockHash()+ "'," \
-                    ""+ std::to_string(receipt.getBlockNumber())+ "," \
-                    ""+  std::to_string(receipt.getTransactionIndex())+ "," \
-                    "'"+ receipt.getStatus() + "'," \
-                    ""+  std::to_string(receipt.getGasUsed())+ "," \
-                    ""+  std::to_string(receipt.getCumulativeGasUsed())+ "," \
-                    "'"+ receipt.getContractAddress()+ "'," \
-                    "'"+ receipt.getLogsBloom()+ "'); " ;
+void bindToBlockTxSql(sqlite3_stmt * stmt, size_t blockId, size_t txId) {
+    sqlite3_bind_int64(stmt, 1, blockId);
+    sqlite3_bind_int64(stmt, 2, txId);
 
-    return receipt_sql;
+    sqlite3_step(stmt);
+    sqlite3_reset(stmt);
+    sqlite3_clear_bindings(stmt);
 }
 
-std::string createFromtoSql(size_t from, size_t to, double amount, size_t txid) {
-    std::string fromto_sql = "INSERT INTO fromto (sender , receiver, amount, txid) "  \
-         "VALUES (" \
-                    "" + std::to_string(from)+ "," \
-                    "" + std::to_string(to)+ "," \
-                    "" + std::to_string(amount)+ "," \
-                    ""+ std::to_string(txid)+ "); " ;
+void bindToTxReceiptSql(sqlite3_stmt * stmt, TransactionReceipt receipt, size_t txId) {
 
-    return fromto_sql;
+    std::string txhash =  receipt.getTransactionHash();
+    std::string blockhash =  receipt.getBlockHash();
+    std::string status =  receipt.getStatus();
+    std::string contractaddress =  receipt.getContractAddress();
+    std::string logsbloom =  receipt.getLogsBloom();
+
+    sqlite3_bind_int64(stmt, 1, txId);
+    sqlite3_bind_text(stmt, 2,  txhash.c_str(), strlen(txhash.c_str()), 0);
+    sqlite3_bind_text(stmt, 3,  blockhash.c_str(), strlen(blockhash.c_str()), 0);
+    sqlite3_bind_int64(stmt, 4, receipt.getBlockNumber());
+    sqlite3_bind_int(stmt, 5, receipt.getTransactionIndex());
+    sqlite3_bind_text(stmt, 6,  status.c_str(), strlen(status.c_str()), 0);
+    sqlite3_bind_int(stmt, 7, receipt.getGasUsed());
+    sqlite3_bind_double(stmt, 8, receipt.getCumulativeGasUsed());
+    sqlite3_bind_text(stmt, 9,  contractaddress.c_str(), strlen(contractaddress.c_str()), 0);
+    sqlite3_bind_text(stmt, 10,  logsbloom.c_str(), strlen(logsbloom.c_str()), 0);
+
+    sqlite3_step(stmt);
+    sqlite3_reset(stmt);
+    sqlite3_clear_bindings(stmt);
+}
+
+void bindToFromtoSql(sqlite3_stmt * stmt, size_t from, size_t to, double amount, size_t txid) {
+    sqlite3_bind_int64(stmt, 1, from);
+    sqlite3_bind_int64(stmt, 2, to);
+    sqlite3_bind_double(stmt, 3, amount);
+    sqlite3_bind_int64(stmt, 4, txid);
+
+
+    sqlite3_step(stmt);
+    sqlite3_reset(stmt);
+    sqlite3_clear_bindings(stmt);
 }
 
 size_t getHashId(rocksdb::DB* db_rocks, std::string hash) {
@@ -249,31 +287,72 @@ size_t updateAndGetAccountHashId(rocksdb::DB* db_rocks, std::string hash, struct
 
 }
 
+int startTransaction(sqlite3 *db){
+    char* errorMessage;
+    // sqlite3_exec(db, "PRAGMA synchronous=OFF", NULL, NULL, &errorMessage);
+    // sqlite3_exec(db, "PRAGMA count_changes=OFF", NULL, NULL, &errorMessage);
+    // sqlite3_exec(db, "PRAGMA journal_mode=MEMORY", NULL, NULL, &errorMessage);
+    // sqlite3_exec(db, "PRAGMA temp_store=MEMORY", NULL, NULL, &errorMessage);
+    // sqlite3_exec(db, "PRAGMA cache_size=10000", NULL, NULL, &errorMessage);
+    return sqlite3_exec(db, "BEGIN TRANSACTION", NULL, NULL, &errorMessage);
+}
+int endTransaction(sqlite3 *db){
+    char* errorMessage;
+    return sqlite3_exec(db, "COMMIT TRANSACTION", NULL, NULL, &errorMessage);
+}
 
 void storeBlockInRDBMS(sqlite3 *db, rocksdb::DB* db_rocks, struct BuilderInfo &info, Parser &parser, Block block) { //
+    startTransaction(db);
 
     // sql string to insert block
-    std::string db_sql = createBlockSql(block);
+    char const *sql_block = "INSERT INTO block (id, hash, parentHash, sha3Uncles, beneficiary, stateRoot, transactionsRoot, receiptsRoot, logsBloom, difficulty, gasLimit, gasUsed, timestamp, extraData, mixHash, nonce ) " \
+                             "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, datetime( ?, 'unixepoch'), ?, ?, ? );";
+
+    char const *sql_tx  = "INSERT INTO tx (id, tx_type, nonce, gasPrice, gasLimit, receiver, value, v_val, r_val, s_val, init, sender, hash ) "  \
+                           "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ? );";
+
+    char const *sql_blocktx = "INSERT INTO blocktx (blockId, txId) "  \
+         "VALUES (?, ?); " ;
+
+    char const *sql_txreceipt = "INSERT INTO txreceipt (id , txHash, blockHash, blockNumber, transactionIndex, status, gasUsed, cumulativeGasUsed, contractAddress, logsBloom) "  \
+         "VALUES (? , ?, ?, ?, ?, ?, ?, ?, ?, ?); " ;
+
+    char const *sql_fromto = "INSERT INTO fromto (sender , receiver, amount, txid) "  \
+         "VALUES (?, ?, ?, ?); " ;
+
+    sqlite3_stmt * stmt_block = nullptr;
+    int rc1 = sqlite3_prepare(db, sql_block, -1, &stmt_block, nullptr);
+
+    sqlite3_stmt * stmt_tx = nullptr;
+    int rc2 = sqlite3_prepare(db, sql_tx, -1, &stmt_tx, nullptr);
+
+    sqlite3_stmt * stmt_blocktx = nullptr;
+    int rc3 = sqlite3_prepare(db, sql_blocktx, -1, &stmt_blocktx, nullptr);
+
+    sqlite3_stmt * stmt_txreceipt = nullptr;
+    int rc4 = sqlite3_prepare(db, sql_txreceipt, -1, &stmt_txreceipt, nullptr);
+
+    sqlite3_stmt * stmt_fromto = nullptr;
+    int rc5 = sqlite3_prepare(db, sql_fromto, -1, &stmt_fromto, nullptr);
+
+    /*
+     *  Block sqlite and rocksdb
+     */
+    bindToBlockSql(stmt_block, block);
 
     // rocksdb : block hash -> id mapping
     updateHashId(db_rocks, info.PREFIX_BLOCK+block.getHash(), info.nextBlockId);
 
-    std::string transactions_sql = "";
-    std::string receipts_sql = "";
-    std::string fromto_sql = "";
-
-    int i;
-    for(i=0;i<block.transactions.size(); i++) {
+    /*
+     *  Transactions and tx receipt to sqlite and rocksdb
+     */
+    for(int i=0;i<block.transactions.size(); i++) {
         Transaction transaction = block.transactions[i];
         TransactionReceipt receipt = parser.getTransactionReceipt(transaction.getHash());
 
-        // sql string to insert transaction
-        std::string tx_sql = createTxSql(transaction, info.nextBlockId, info.nextTxId);
-        transactions_sql = transactions_sql+tx_sql;
-
-        // sql string to insert transaction receipt
-        std::string tx_receipt_sql = createTxReceiptSql(receipt, info.nextTxId);
-        receipts_sql = receipts_sql+tx_receipt_sql;
+        bindToTxSql(stmt_tx, transaction, info.nextBlockId, info.nextTxId);
+        bindToBlockTxSql(stmt_blocktx, info.nextBlockId, info.nextTxId);
+        bindToTxReceiptSql(stmt_txreceipt, receipt, info.nextTxId);
 
         /*
          * todo
@@ -291,22 +370,27 @@ void storeBlockInRDBMS(sqlite3 *db, rocksdb::DB* db_rocks, struct BuilderInfo &i
         // if there's a sender and a receiver for a transaction, should insert to fromto table
         if (senderId != -1 && receiverId != -1) {
             // sql string to insert from-to
-            std::string tx_fromto = createFromtoSql(senderId, receiverId, transaction.getValue(), info.nextTxId);
-            fromto_sql = fromto_sql+fromto_sql;
+            bindToFromtoSql(stmt_fromto, senderId, receiverId, transaction.getValue(), info.nextTxId);
         } else {
-            std::cout << transaction.getHash() << " in block " << block.header.getNumber() <<" is not a normal transaction" << std::endl;
+            // std::cout << transaction.getHash() << " in block " << block.header.getNumber() <<" is not a normal transaction" << std::endl;
         }
 
         info.nextTxId++;
     }
 
+    sqlite3_finalize(stmt_block);
+    sqlite3_finalize(stmt_tx);
+    sqlite3_finalize(stmt_blocktx);
+    sqlite3_finalize(stmt_txreceipt);
+    sqlite3_finalize(stmt_fromto);
     // Execute SQL statement
-    int isQuerySuccess = run_sql_query(db, db_sql+transactions_sql+receipts_sql+fromto_sql, "Block "+std::to_string(block.header.getNumber())+ " insertion");
+    // int isQuerySuccess = run_sql_query(db, db_sql+transactions_sql+receipts_sql+fromto_sql, "Block "+std::to_string(block.header.getNumber())+ " insertion");
 
-    if(isQuerySuccess) {
-        info.nextBlockId++;
-    } else {
-        // Todo : Rollback partial sqlite insertions
-    }
-    // printf("Came here\n\n");
+    endTransaction(db);
+
+    info.nextBlockId++;
+
+    // Todo : transaction roll backs on failure
 }
+
+
