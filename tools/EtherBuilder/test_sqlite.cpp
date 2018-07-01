@@ -1,7 +1,6 @@
 /*
  * Created by prabushitha on 6/29/18.
 */
-#include "parser.h"
 #include "test_sqlite.h"
 #include <sqlite3.h>
 #include <iostream>

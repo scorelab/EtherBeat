@@ -1,4 +1,3 @@
-#include "parser.h"
 #include "block_store.h"
 #include <sqlite3.h>
 #include <iostream>
@@ -63,21 +62,23 @@ int main() {
     Parser p("/home/prabushitha/.ethereum/rinkeby/geth/chaindata");
 
 
-    //printf("Initial id: %d \nInitial Tx id: %d \n", info.nextBlockId, info.nextTxId);
     std::cout << "starting block id \t" << info.nextBlockId << std::endl;
     std::cout << "starting tx id    \t" << info.nextTxId << std::endl;
     std::cout << "starting addr id  \t" << info.nextAddressId << std::endl;
+    std::cout << "-------------------------------------" << std::endl;
+    std::cout << "-----------PARSING STARTED-----------" << std::endl;
+    std::cout << "-------------------------------------" << std::endl;
     // lets store blocks!!!
     size_t max_blocks = info.nextBlockId+100000;
     for(size_t i=info.nextBlockId; i<max_blocks; i++) {
         Block b = p.getBlock(i);
         storeBlockInRDBMS(db_sqlite, db_rocks, info, p, b); // db_rocks
     }
+    std::cout << "----------PARSING COMPLETED----------" << std::endl;
     std::cout << "-------------------------------------" << std::endl;
     std::cout << "next block id \t" << info.nextBlockId << std::endl;
     std::cout << "next tx id    \t" << info.nextTxId << std::endl;
     std::cout << "next addr id  \t" << info.nextAddressId << std::endl;
-    // printf("Next block id: %d \nNext Tx id: %d \n", info.nextBlockId, info.nextTxId);
 
     // save last ids
     s1 = db_rocks->Put(rocksdb::WriteOptions(), info.INFO_PREFIX_NEXT_BLOCKID, std::to_string(info.nextBlockId));

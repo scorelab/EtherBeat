@@ -9,6 +9,16 @@
 #include "block_store.h"
 
 #define NUMBER_OF_INSERTIONS 100000
+
+static int callback(void *NotUsed, int argc, char **argv, char **azColName) {
+    int i;
+    for(i = 0; i<argc; i++) {
+        printf("%s = %s\n", azColName[i], argv[i] ? argv[i] : "NULL");
+    }
+    printf("\n");
+    return 0;
+}
+
 long int getTime() {
 
     auto ms = std::chrono::duration_cast< std::chrono::milliseconds>(
