@@ -11,10 +11,11 @@
 #include <cstdarg>
 
 
+
 struct BuilderInfo {
-    std::string INFO_PREFIX_NEXT_BLOCKID = "info_last_block_id";
-    std::string INFO_PREFIX_NEXT_TXID = "info_last_tx_id";
-    std::string INFO_PREFIX_NEXT_ADDRESSID = "info_last_address_id";
+    std::string KEY_NEXT_BLOCKID = "info_next_block_id";
+    std::string KEY_NEXT_TXID = "info_next_tx_id";
+    std::string KEY_NEXT_ADDRESSID = "info_next_address_id";
 
     size_t nextBlockId;
     size_t nextTxId;
@@ -24,6 +25,7 @@ struct BuilderInfo {
     std::string PREFIX_TX = "tx_";
     std::string PREFIX_ADDRESS = "address_";
 };
+
 
 int run_sql_query(sqlite3 *db, std::string sql, std::string title);
 
@@ -48,5 +50,13 @@ size_t updateAndGetAccountHashId(rocksdb::DB* db_rocks, std::string hash, struct
 int startTransaction(sqlite3 *db);
 int endTransaction(sqlite3 *db);
 
-void storeBlockInRDBMS(sqlite3 *db, rocksdb::DB* db_rocks, struct BuilderInfo &info, Parser &parser, Block block);
+void storeBlockInRDBMS(sqlite3_stmt * stmt_block,
+                       sqlite3_stmt * stmt_tx,
+                       sqlite3_stmt * stmt_blocktx,
+                       sqlite3_stmt * stmt_txreceipt,
+                       sqlite3_stmt * stmt_fromto,
+                       rocksdb::DB* db_rocks,
+                       struct BuilderInfo &info,
+                       Parser &parser,
+                       Block block);
 

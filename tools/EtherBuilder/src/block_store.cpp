@@ -1,10 +1,6 @@
 /*
  * Created by prabushitha on 7/1/18.
 */
-
-/*
- * Created by prabushitha on 6/12/18.
-*/
 #include "block_store.h"
 #include "rocksdb/db.h"
 #include <sqlite3.h>
@@ -13,6 +9,7 @@
 #include <sstream>
 #include <string>
 #include <cstdarg>
+
 
 static int callback(void *NotUsed, int argc, char **argv, char **azColName) {
     int i;
@@ -284,46 +281,24 @@ int startTransaction(sqlite3 *db){
     // sqlite3_exec(db, "PRAGMA journal_mode=MEMORY", NULL, NULL, &errorMessage);
     // sqlite3_exec(db, "PRAGMA temp_store=MEMORY", NULL, NULL, &errorMessage);
     // sqlite3_exec(db, "PRAGMA cache_size=10000", NULL, NULL, &errorMessage);
-    return sqlite3_exec(db, "BEGIN TRANSACTION", NULL, NULL, &errorMessage);
+    return sqlite3_exec(db, "BEGIN TRANSACTION", nullptr, nullptr, &errorMessage);
 }
 int endTransaction(sqlite3 *db){
     char* errorMessage;
-    return sqlite3_exec(db, "COMMIT TRANSACTION", NULL, NULL, &errorMessage);
+    return sqlite3_exec(db, "COMMIT TRANSACTION", nullptr, nullptr, &errorMessage);
 }
 
-void storeBlockInRDBMS(sqlite3 *db, rocksdb::DB* db_rocks, struct BuilderInfo &info, Parser &parser, Block block) { //
-    startTransaction(db);
-
-    // sql string to insert block
-    char const *sql_block = "INSERT INTO block (id, hash, parentHash, sha3Uncles, beneficiary, stateRoot, transactionsRoot, receiptsRoot, logsBloom, difficulty, gasLimit, gasUsed, timestamp, extraData, mixHash, nonce ) " \
-                             "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, datetime( ?, 'unixepoch'), ?, ?, ? );";
-
-    char const *sql_tx  = "INSERT INTO tx (id, tx_type, nonce, gasPrice, gasLimit, receiver, value, v_val, r_val, s_val, init, sender, hash ) "  \
-                           "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ? );";
-
-    char const *sql_blocktx = "INSERT INTO blocktx (blockId, txId) "  \
-         "VALUES (?, ?); " ;
-
-    char const *sql_txreceipt = "INSERT INTO txreceipt (id , txHash, blockHash, blockNumber, transactionIndex, status, gasUsed, cumulativeGasUsed, contractAddress, logsBloom) "  \
-         "VALUES (? , ?, ?, ?, ?, ?, ?, ?, ?, ?); " ;
-
-    char const *sql_fromto = "INSERT INTO fromto (sender , receiver, amount, txid) "  \
-         "VALUES (?, ?, ?, ?); " ;
-
-    sqlite3_stmt * stmt_block = nullptr;
-    int rc1 = sqlite3_prepare(db, sql_block, -1, &stmt_block, nullptr);
-
-    sqlite3_stmt * stmt_tx = nullptr;
-    int rc2 = sqlite3_prepare(db, sql_tx, -1, &stmt_tx, nullptr);
-
-    sqlite3_stmt * stmt_blocktx = nullptr;
-    int rc3 = sqlite3_prepare(db, sql_blocktx, -1, &stmt_blocktx, nullptr);
-
-    sqlite3_stmt * stmt_txreceipt = nullptr;
-    int rc4 = sqlite3_prepare(db, sql_txreceipt, -1, &stmt_txreceipt, nullptr);
-
-    sqlite3_stmt * stmt_fromto = nullptr;
-    int rc5 = sqlite3_prepare(db, sql_fromto, -1, &stmt_fromto, nullptr);
+void storeBlockInRDBMS(
+        sqlite3_stmt * stmt_block,
+        sqlite3_stmt * stmt_tx,
+        sqlite3_stmt * stmt_blocktx,
+        sqlite3_stmt * stmt_txreceipt,
+        sqlite3_stmt * stmt_fromto,
+        rocksdb::DB* db_rocks,
+        struct BuilderInfo &info,
+        Parser &parser,
+        Block block
+) {
 
     /*
      *  Block sqlite and rocksdb
@@ -362,21 +337,12 @@ void storeBlockInRDBMS(sqlite3 *db, rocksdb::DB* db_rocks, struct BuilderInfo &i
             // sql string to insert from-to
             bindToFromtoSql(stmt_fromto, senderId, receiverId, transaction.getValue(), info.nextTxId);
         } else {
-            // std::cout << transaction.getHash() << " in block " << block.header.getNumber() <<" is not a normal transaction" << std::endl;
+            // NOT A NORMAL TRANSACTION
         }
 
         info.nextTxId++;
     }
 
-    sqlite3_finalize(stmt_block);
-    sqlite3_finalize(stmt_tx);
-    sqlite3_finalize(stmt_blocktx);
-    sqlite3_finalize(stmt_txreceipt);
-    sqlite3_finalize(stmt_fromto);
-    // Execute SQL statement
-    // int isQuerySuccess = run_sql_query(db, db_sql+transactions_sql+receipts_sql+fromto_sql, "Block "+std::to_string(block.header.getNumber())+ " insertion");
-
-    endTransaction(db);
 
     info.nextBlockId++;
 

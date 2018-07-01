@@ -1,8 +1,56 @@
 #include "block_store.h"
+#include "sql_statements.h"
+#include "timing.h"
 #include <sqlite3.h>
 #include <iostream>
 #include <stdio.h>
 
+#define BLOCKS_PER_SQLITE_TRANSACTION 10000
+
+void parseBlocks(sqlite3 *db_sqlite, rocksdb::DB* db_rocks, struct BuilderInfo &info, Parser &parser, size_t start, size_t end) {
+    // start a transaction
+    startTransaction(db_sqlite);
+
+
+    sqlite3_stmt * stmt_block = nullptr;
+    int rc1 = sqlite3_prepare(db_sqlite, sql_block, -1, &stmt_block, nullptr);
+
+    sqlite3_stmt * stmt_tx = nullptr;
+    int rc2 = sqlite3_prepare(db_sqlite, sql_tx, -1, &stmt_tx, nullptr);
+
+    sqlite3_stmt * stmt_blocktx = nullptr;
+    int rc3 = sqlite3_prepare(db_sqlite, sql_blocktx, -1, &stmt_blocktx, nullptr);
+
+    sqlite3_stmt * stmt_txreceipt = nullptr;
+    int rc4 = sqlite3_prepare(db_sqlite, sql_txreceipt, -1, &stmt_txreceipt, nullptr);
+
+    sqlite3_stmt * stmt_fromto = nullptr;
+    int rc5 = sqlite3_prepare(db_sqlite, sql_fromto, -1, &stmt_fromto, nullptr);
+
+    // parse
+    for(size_t i=start; i<end; i++) {
+        Block block = parser.getBlock(i);
+
+        storeBlockInRDBMS(stmt_block,
+                          stmt_tx,
+                          stmt_blocktx,
+                          stmt_txreceipt,
+                          stmt_fromto,
+                          db_rocks,
+                          info,
+                          parser,
+                          block);
+    }
+
+    // finalize
+    sqlite3_finalize(stmt_block);
+    sqlite3_finalize(stmt_tx);
+    sqlite3_finalize(stmt_blocktx);
+    sqlite3_finalize(stmt_txreceipt);
+    sqlite3_finalize(stmt_fromto);
+
+    endTransaction(db_sqlite);
+}
 
 int main() {
     // Connect to SQLite
@@ -31,18 +79,18 @@ int main() {
 
 
     // get last info
-    std::string lastBlockId;
-    rocksdb::Status s1 = db_rocks->Get(rocksdb::ReadOptions(), info.INFO_PREFIX_NEXT_BLOCKID, &lastBlockId);
-    std::string lastTxId;
-    rocksdb::Status s2 = db_rocks->Get(rocksdb::ReadOptions(), info.INFO_PREFIX_NEXT_TXID, &lastTxId);
-    std::string lastAddressId;
-    rocksdb::Status s3 = db_rocks->Get(rocksdb::ReadOptions(), info.INFO_PREFIX_NEXT_ADDRESSID, &lastAddressId);
+    std::string nextBlockId;
+    rocksdb::Status s1 = db_rocks->Get(rocksdb::ReadOptions(), info.KEY_NEXT_BLOCKID, &nextBlockId);
+    std::string nextTxId;
+    rocksdb::Status s2 = db_rocks->Get(rocksdb::ReadOptions(), info.KEY_NEXT_TXID, &nextTxId);
+    std::string nextAddressId;
+    rocksdb::Status s3 = db_rocks->Get(rocksdb::ReadOptions(), info.KEY_NEXT_ADDRESSID, &nextAddressId);
 
     if (s1.ok() && s2.ok() && s3.ok()) {
-        printf("Rocks last %s\n Rocks last tx %s\n", lastBlockId.c_str(), lastTxId.c_str());
-        info.nextBlockId = (size_t)std::stoi( lastBlockId );
-        info.nextTxId = (size_t)std::stoi( lastTxId );
-        info.nextAddressId = (size_t)std::stoi( lastAddressId );
+        printf("Rocks last %s\n Rocks last tx %s\n", nextBlockId.c_str(), nextTxId.c_str());
+        info.nextBlockId = (size_t)std::stoi( nextBlockId );
+        info.nextTxId = (size_t)std::stoi( nextTxId );
+        info.nextAddressId = (size_t)std::stoi( nextAddressId );
 
     }else {
         printf("keys not found \n");
@@ -68,12 +116,32 @@ int main() {
     std::cout << "-------------------------------------" << std::endl;
     std::cout << "-----------PARSING STARTED-----------" << std::endl;
     std::cout << "-------------------------------------" << std::endl;
-    // lets store blocks!!!
-    size_t max_blocks = info.nextBlockId+100000;
-    for(size_t i=info.nextBlockId; i<max_blocks; i++) {
-        Block b = p.getBlock(i);
-        storeBlockInRDBMS(db_sqlite, db_rocks, info, p, b); // db_rocks
+
+    // Start timing
+    TimeCalculator timer{};
+    timer.setStart();
+
+    // Parsing started
+    size_t parse_start_block = info.nextBlockId;
+    size_t parse_end_block = info.nextBlockId+100000;
+
+    size_t total_sqlite_transactions = (parse_end_block-parse_start_block)/BLOCKS_PER_SQLITE_TRANSACTION;
+
+    for(size_t i=0; i<total_sqlite_transactions; i++) {
+        size_t local_start = parse_start_block+BLOCKS_PER_SQLITE_TRANSACTION*i;
+        size_t local_end = local_start+BLOCKS_PER_SQLITE_TRANSACTION;
+        if(i==total_sqlite_transactions-1){
+            local_end = parse_end_block;
+        }
+        std::cout << "Tranasction : " << local_start << " to "<< local_end << std::endl;
+
+        parseBlocks(db_sqlite, db_rocks, info, p, local_start, local_end);
     }
+
+
+
+    // Parsing over
+    timer.printElapsedTime();
     std::cout << "----------PARSING COMPLETED----------" << std::endl;
     std::cout << "-------------------------------------" << std::endl;
     std::cout << "next block id \t" << info.nextBlockId << std::endl;
@@ -81,8 +149,9 @@ int main() {
     std::cout << "next addr id  \t" << info.nextAddressId << std::endl;
 
     // save last ids
-    s1 = db_rocks->Put(rocksdb::WriteOptions(), info.INFO_PREFIX_NEXT_BLOCKID, std::to_string(info.nextBlockId));
-    s2 = db_rocks->Put(rocksdb::WriteOptions(), info.INFO_PREFIX_NEXT_TXID, std::to_string(info.nextTxId));
+    s1 = db_rocks->Put(rocksdb::WriteOptions(), info.KEY_NEXT_BLOCKID, std::to_string(info.nextBlockId));
+    s2 = db_rocks->Put(rocksdb::WriteOptions(), info.KEY_NEXT_TXID, std::to_string(info.nextTxId));
+    s2 = db_rocks->Put(rocksdb::WriteOptions(), info.KEY_NEXT_ADDRESSID, std::to_string(info.nextAddressId));
     // close databases
     sqlite3_close(db_sqlite);
     delete db_rocks;

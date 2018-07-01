@@ -19,6 +19,8 @@ set(SOURCES
 )
 set(HEADERS
         include/block_store.h
+        include/sql_statements.h
+        include/timing.h
         include/test_sqlite.h
 )
 
