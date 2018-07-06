@@ -7,7 +7,7 @@
 #include "leveldb/db.h"
 #include <vector>
 
-class Parser {
+class EtherExtractor {
 
 
     leveldb::DB * db;
@@ -24,8 +24,8 @@ class Parser {
     uint8_t lookupPrefix[1] = {108};  // l : lookupPrefix + hash -> transaction/receipt lookup metadata (BlockHash, BlockIndex, Index)
 
     public:
-        Parser(std::string db_path);
-        ~Parser() {
+        EtherExtractor(std::string db_path);
+        ~EtherExtractor() {
             delete db;
         }
         Block getBlock(uint64_t blockNumber);

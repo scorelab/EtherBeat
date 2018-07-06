@@ -1,14 +1,14 @@
 /*
  * Created by prabushitha on 5/19/18.
 */
-#include "parser.h"
+#include "extractor.h"
 #include "rlp.h"
 #include <vector>
 #include <iostream>
 
 // todo : Resize vectors (header attributes, block attributes, transaction attributes) to the required amount of memory
 
-Parser::Parser(std::string db_path) {
+EtherExtractor::EtherExtractor(std::string db_path) {
     // leveldb::DB* db;
     options.create_if_missing = true;
     leveldb::Status status = leveldb::DB::Open(options, db_path, &db);
@@ -22,7 +22,7 @@ Parser::Parser(std::string db_path) {
 * BLOCK RELATED PARSING
 *
 */
-Block Parser::getBlock(uint64_t blockNumber) {
+Block EtherExtractor::getBlock(uint64_t blockNumber) {
     // We need to get the hash of the block first.
     std::string hashKey = createBlockHashKey(blockNumber);
     // create a string variable to store the hash
@@ -38,7 +38,7 @@ Block Parser::getBlock(uint64_t blockNumber) {
     throw;
 }
 
-Block Parser::getBlock(std::string blockHashHex) {
+Block EtherExtractor::getBlock(std::string blockHashHex) {
 
     blockHashHex = remove0xFromString(blockHashHex);
 
@@ -66,7 +66,7 @@ Block Parser::getBlock(std::string blockHashHex) {
     throw;
 }
 
-Block Parser::getBlock(uint64_t blockNumber, std::string blockHash){
+Block EtherExtractor::getBlock(uint64_t blockNumber, std::string blockHash){
 
     std::string headerKey = createBlockHeaderKey(blockNumber, blockHash);
 
@@ -119,7 +119,7 @@ Block Parser::getBlock(uint64_t blockNumber, std::string blockHash){
     throw;
 }
 // get transaction receipt
-TransactionReceipt Parser::getTransactionReceipt(std::string transactionHashHex) {
+TransactionReceipt EtherExtractor::getTransactionReceipt(std::string transactionHashHex) {
 
     transactionHashHex = remove0xFromString(transactionHashHex);
 
@@ -149,7 +149,7 @@ TransactionReceipt Parser::getTransactionReceipt(std::string transactionHashHex)
     throw;
 }
 // get tx receipts of the block
-std::vector<TransactionReceipt> Parser::getBlockTxReceipts(uint64_t blockNumber, std::string blockHash) {
+std::vector<TransactionReceipt> EtherExtractor::getBlockTxReceipts(uint64_t blockNumber, std::string blockHash) {
 
     std::string receiptsKey = createBlockReceiptKey(blockNumber, blockHash);
 
@@ -172,32 +172,32 @@ std::vector<TransactionReceipt> Parser::getBlockTxReceipts(uint64_t blockNumber,
 }
 
 // create block hash key
-std::string Parser::createBlockHashKey(uint64_t blockNumber) {
+std::string EtherExtractor::createBlockHashKey(uint64_t blockNumber) {
     return getKeyString(headerPrefix, &toBigEndianEightBytes(blockNumber)[0], numSuffix, 1, 8, 1);
 }
 
 //get block header key
-std::string Parser::createBlockHeaderKey(uint64_t blockNumber, std::string blockHash) {
+std::string EtherExtractor::createBlockHeaderKey(uint64_t blockNumber, std::string blockHash) {
     return getKeyString(headerPrefix, &toBigEndianEightBytes(blockNumber)[0], (uint8_t *)&blockHash[0], 1, 8, 32);
 }
 
 //get block body key
-std::string Parser::createBlockBodyKey(uint64_t blockNumber, std::string blockHash) {
+std::string EtherExtractor::createBlockBodyKey(uint64_t blockNumber, std::string blockHash) {
     return getKeyString(bodyPrefix, &toBigEndianEightBytes(blockNumber)[0], (uint8_t *)&blockHash[0], 1, 8, 32);
 }
 
 //get block receipts key
-std::string Parser::createBlockReceiptKey(uint64_t blockNumber, std::string blockHash) {
+std::string EtherExtractor::createBlockReceiptKey(uint64_t blockNumber, std::string blockHash) {
     return getKeyString(blockReceiptsPrefix, &toBigEndianEightBytes(blockNumber)[0], (uint8_t *)&blockHash[0], 1, 8, 32);
 }
 
 //get tx lookup key
-std::string Parser::createLookupKey(std::string transactionHash) {
+std::string EtherExtractor::createLookupKey(std::string transactionHash) {
     return getKeyString(lookupPrefix, (uint8_t *)&transactionHash[0], {}, 1, 32, 0);
 }
 
 
-void Parser::updateHeader(Header *header, std::vector<uint8_t> contents, RLP & rlp){
+void EtherExtractor::updateHeader(Header *header, std::vector<uint8_t> contents, RLP & rlp){
 
     header->parentHash_bytes = createByteVector(contents, rlp[0]);
     header->sha3Uncles_bytes = createByteVector(contents, rlp[1]);
@@ -217,7 +217,7 @@ void Parser::updateHeader(Header *header, std::vector<uint8_t> contents, RLP & r
 
 }
 
-void Parser::updateBody(Block *block, std::vector<uint8_t> contents, RLP & rlp){
+void EtherExtractor::updateBody(Block *block, std::vector<uint8_t> contents, RLP & rlp){
     if (rlp.numItems() > 1) {
         int i;
         // get transactions
@@ -262,7 +262,7 @@ void Parser::updateBody(Block *block, std::vector<uint8_t> contents, RLP & rlp){
 
 }
 
-void Parser::updateTxReceiptMeta(TransactionReceiptMeta *meta, std::vector<uint8_t> contents, RLP & rlp) {
+void EtherExtractor::updateTxReceiptMeta(TransactionReceiptMeta *meta, std::vector<uint8_t> contents, RLP & rlp) {
 
     if (rlp.numItems() == 3) {
         std::vector<uint8_t> tempVec =  createByteVector(contents, rlp[0]);
@@ -276,7 +276,7 @@ void Parser::updateTxReceiptMeta(TransactionReceiptMeta *meta, std::vector<uint8
     }
 }
 
-void Parser::updateTxReceipts(std::vector<TransactionReceipt> *receipts, uint64_t blockNumber, std::vector<uint8_t> blockHash, std::vector<uint8_t> contents, RLP & rlp){
+void EtherExtractor::updateTxReceipts(std::vector<TransactionReceipt> *receipts, uint64_t blockNumber, std::vector<uint8_t> blockHash, std::vector<uint8_t> contents, RLP & rlp){
     int i;
     for (i=0; i<rlp.numItems(); i++) {
         TransactionReceipt receipt;
@@ -298,7 +298,7 @@ void Parser::updateTxReceipts(std::vector<TransactionReceipt> *receipts, uint64_
     }
 }
 
-std::vector<uint8_t> Parser::createByteVector(std::vector<uint8_t> contents, const RLP & rlp) {
+std::vector<uint8_t> EtherExtractor::createByteVector(std::vector<uint8_t> contents, const RLP & rlp) {
     std::vector<uint8_t>::const_iterator first = contents.begin() + rlp.dataOffset();
     std::vector<uint8_t>::const_iterator last = contents.begin() + rlp.dataOffset() + rlp.dataLength();
     std::vector<uint8_t> newVec(first, last);
@@ -311,13 +311,13 @@ std::vector<uint8_t> Parser::createByteVector(std::vector<uint8_t> contents, con
 *
 */
 
-Account Parser::getAccount(std::string address) {
+Account EtherExtractor::getAccount(std::string address) {
     // todo : get the latest block number
     uint64_t latestBlock = 100;//189154;
     return getAccount(address, latestBlock);
 }
 
-Account Parser::getAccount(std::string address, uint64_t blockHeight) {
+Account EtherExtractor::getAccount(std::string address, uint64_t blockHeight) {
     // todo : not implemented. has to implement using merkel patricia tree
     Block b = getBlock(blockHeight);
 

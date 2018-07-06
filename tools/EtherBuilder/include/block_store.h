@@ -1,7 +1,7 @@
 /*
  * Created by prabushitha on 6/12/18.
 */
-#include "parser.h"
+#include "extractor.h"
 #include "rocksdb/db.h"
 #include <sqlite3.h>
 #include <iostream>
@@ -57,6 +57,6 @@ void storeBlockInRDBMS(sqlite3_stmt * stmt_block,
                        sqlite3_stmt * stmt_fromto,
                        rocksdb::DB* db_rocks,
                        struct BuilderInfo &info,
-                       Parser &parser,
+                       EtherExtractor &extractor,
                        Block block);
 

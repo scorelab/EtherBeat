@@ -6,13 +6,13 @@ project(${PROJECT_NAME})
 
 set(CMAKE_CXX_STANDARD 11)
 
-# include the parser library in tools/parser
+# include the extractor library in tools/EtherExtractor
 link_directories(
-        ../parser/build
+        ../EtherExtractor/build
 )
 include_directories(
         include
-        ../parser/include
+        ../EtherExtractor/include
 )
 set(SOURCES
         src/block_store.cpp
@@ -28,8 +28,8 @@ set(HEADERS
 # create the executable
 add_executable(${PROJECT_NAME} main.cpp ${SOURCES} ${HEADERS})
 
-target_link_libraries (${PROJECT_NAME} rocksdb leveldb cryptopp secp256k1 gtest ethereum_parser sqlite3 ${BASE_LIBS})
+target_link_libraries (${PROJECT_NAME} rocksdb leveldb cryptopp secp256k1 gtest ethereum_extractor sqlite3 ${BASE_LIBS})
 
 # researching related
 add_executable(test_sqlite test_sqlite.cpp ${SOURCES} ${HEADERS})
-target_link_libraries (test_sqlite rocksdb leveldb cryptopp secp256k1 gtest ethereum_parser sqlite3 ${BASE_LIBS})
+target_link_libraries (test_sqlite rocksdb leveldb cryptopp secp256k1 gtest ethereum_extractor sqlite3 ${BASE_LIBS})

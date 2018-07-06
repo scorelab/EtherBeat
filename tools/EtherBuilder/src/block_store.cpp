@@ -296,7 +296,7 @@ void storeBlockInRDBMS(
         sqlite3_stmt * stmt_fromto,
         rocksdb::DB* db_rocks,
         struct BuilderInfo &info,
-        Parser &parser,
+        EtherExtractor &extractor,
         Block block
 ) {
 
@@ -313,7 +313,7 @@ void storeBlockInRDBMS(
      */
     for(int i=0;i<block.transactions.size(); i++) {
         Transaction transaction = block.transactions[i];
-        TransactionReceipt receipt = parser.getTransactionReceipt(transaction.getHash());
+        TransactionReceipt receipt = extractor.getTransactionReceipt(transaction.getHash());
 
         bindToTxSql(stmt_tx, transaction, info.nextBlockId, info.nextTxId);
         bindToBlockTxSql(stmt_blocktx, info.nextBlockId, info.nextTxId);

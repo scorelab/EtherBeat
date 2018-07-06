@@ -2,13 +2,13 @@
  * Created by prabushitha on 5/6/18.
 */
 
-#include "parser.h"
+#include "extractor.h"
 #include <iostream>
 #include <chrono>
 
 int main(int argc, const char *argv[]) {
 
-    Parser parser("/home/prabushitha/.ethereum/rinkeby/geth/chaindata");
+    EtherExtractor extractor("/home/prabushitha/.ethereum/rinkeby/geth/chaindata");
 
     // TESTING PURPOSE
     /*
@@ -39,14 +39,14 @@ int main(int argc, const char *argv[]) {
     // Block b2 = parser.getBlock("0xdb16f0d4465f2fd79f10ba539b169404a3e026db1be082e7fd6071b4c5f37db7");
     // b2.print();
 
-    Block b = parser.getBlock(189154);
+    Block b = extractor.getBlock(189154);
     // Block b = parser.getBlock(55);
     b.print();
     // Block b = parser.getBlock(2267598);
     // Block b = parser.getBlock(1795026);
     // b.print();
 
-    TransactionReceipt tr = parser.getTransactionReceipt("0xfddd30b69b0c4f918785e83c8b8ddd21fe3e2019a142fc382b88fa5de6c88fa2");
+    TransactionReceipt tr = extractor.getTransactionReceipt("0xfddd30b69b0c4f918785e83c8b8ddd21fe3e2019a142fc382b88fa5de6c88fa2");
     tr.print();
     // testing account
     /*

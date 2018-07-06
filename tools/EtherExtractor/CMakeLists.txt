@@ -1,10 +1,10 @@
 cmake_minimum_required(VERSION 2.8.9)
 
 
-project(ethereum_parser DESCRIPTION "Library to parse ethereum raw data from leveldb")
+project(ethereum_extractor DESCRIPTION "Library to extract ethereum raw data from leveldb")
 
 #Define project name
-set(PROJECT_NAME "ethereum_parser")
+set(PROJECT_NAME "ethereum_extractor")
 
 #Bring the headers, such as Block.h into the project
 include_directories(include)
@@ -13,7 +13,7 @@ include_directories(include)
 set(SOURCES
         src/utils.cpp
         src/rlp.cpp
-        src/parser.cpp
+        src/extractor.cpp
         src/block.cpp
         src/address_recover.cpp
         src/account.cpp
@@ -28,10 +28,10 @@ if(NOT ${IS_LIBRARY})
     target_link_libraries (${PROJECT_NAME} leveldb cryptopp secp256k1 gtest ${BASE_LIBS})
 
     file(GLOB TEST_SRCS "test/*.cpp")
-    add_executable(test_parser ${SOURCES} ${TEST_SRCS})
-    target_link_libraries (test_parser leveldb cryptopp secp256k1 gtest ${BASE_LIBS})
+    add_executable(test_extractor ${SOURCES} ${TEST_SRCS})
+    target_link_libraries (test_extractor leveldb cryptopp secp256k1 gtest ${BASE_LIBS})
 endif()
 
 if(${IS_LIBRARY})
-    add_library(ethereum_parser SHARED ${SOURCES})
+    add_library(ethereum_extractor SHARED ${SOURCES})
 endif()

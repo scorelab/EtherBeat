@@ -7,7 +7,7 @@
 
 #define BLOCKS_PER_SQLITE_TRANSACTION 10000
 
-void parseBlocks(sqlite3 *db_sqlite, rocksdb::DB* db_rocks, struct BuilderInfo &info, Parser &parser, size_t start, size_t end) {
+void parseBlocks(sqlite3 *db_sqlite, rocksdb::DB* db_rocks, struct BuilderInfo &info, EtherExtractor &extractor, size_t start, size_t end) {
     // start a transaction
     startTransaction(db_sqlite);
 
@@ -29,7 +29,7 @@ void parseBlocks(sqlite3 *db_sqlite, rocksdb::DB* db_rocks, struct BuilderInfo &
 
     // parse
     for(size_t i=start; i<end; i++) {
-        Block block = parser.getBlock(i);
+        Block block = extractor.getBlock(i);
 
         storeBlockInRDBMS(stmt_block,
                           stmt_tx,
@@ -38,7 +38,7 @@ void parseBlocks(sqlite3 *db_sqlite, rocksdb::DB* db_rocks, struct BuilderInfo &
                           stmt_fromto,
                           db_rocks,
                           info,
-                          parser,
+                          extractor,
                           block);
     }
 
@@ -107,7 +107,7 @@ int main() {
 
 
 
-    Parser p("/home/prabushitha/.ethereum/rinkeby/geth/chaindata");
+    EtherExtractor extractor("/home/prabushitha/.ethereum/rinkeby/geth/chaindata");
 
 
     std::cout << "starting block id \t" << info.nextBlockId << std::endl;
@@ -121,7 +121,7 @@ int main() {
     TimeCalculator timer{};
     timer.setStart();
 
-    // Parsing started
+    // Build started
     size_t parse_start_block = info.nextBlockId;
     size_t parse_end_block = info.nextBlockId+100000;
 
@@ -135,12 +135,12 @@ int main() {
         }
         std::cout << "Tranasction : " << local_start << " to "<< local_end << std::endl;
 
-        parseBlocks(db_sqlite, db_rocks, info, p, local_start, local_end);
+        parseBlocks(db_sqlite, db_rocks, info, extractor, local_start, local_end);
     }
 
 
 
-    // Parsing over
+    // Build over
     timer.printElapsedTime();
     std::cout << "----------PARSING COMPLETED----------" << std::endl;
     std::cout << "-------------------------------------" << std::endl;

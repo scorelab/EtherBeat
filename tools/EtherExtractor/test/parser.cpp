@@ -3,28 +3,28 @@
  *
  */
 #include <gtest/gtest.h>
-#include "parser.h"
+#include "extractor.h"
 
 
 struct ParserTest : testing::Test {
-    Parser* parser;
+    EtherExtractor* extractor;
     ParserTest() {
-        parser = new Parser("../test/sample/chaindata");
+        extractor = new EtherExtractor("../test/sample/chaindata");
     }
 
     ~ParserTest() {
-        delete parser;
+        delete extractor;
     }
 };
 
 
 TEST_F(ParserTest, GetBlockByHash) {
-    Block b = parser->getBlock("0xe01eb24a18d0c117409a7b8946ed16b4c485ed79746644b89250384ed9bf2fda");;
+    Block b = extractor->getBlock("0xe01eb24a18d0c117409a7b8946ed16b4c485ed79746644b89250384ed9bf2fda");;
     std::vector<uint8_t> hash;
     EXPECT_EQ(b.hash_bytes.size(), 32);
 }
 TEST_F(ParserTest, GetBlockByNumber) {
-    Block b = parser->getBlock(189154);;
+    Block b = extractor->getBlock(189154);;
     std::vector<uint8_t> hash;
     EXPECT_EQ(b.hash_bytes.size(), 32);
     EXPECT_EQ(b.transactions.size(), 16);
@@ -32,7 +32,7 @@ TEST_F(ParserTest, GetBlockByNumber) {
     EXPECT_EQ(b.header.nonce_bytes.size(), 8);
 }
 TEST_F(ParserTest, GetTransactionReceipt) {
-    TransactionReceipt tr = parser->getTransactionReceipt("0xfddd30b69b0c4f918785e83c8b8ddd21fe3e2019a142fc382b88fa5de6c88fa2");
+    TransactionReceipt tr = extractor->getTransactionReceipt("0xfddd30b69b0c4f918785e83c8b8ddd21fe3e2019a142fc382b88fa5de6c88fa2");
     EXPECT_EQ(tr.blockNumber, 189154);
     EXPECT_EQ(tr.transactionIndex, 0);
 }
