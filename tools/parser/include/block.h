@@ -99,10 +99,10 @@ class Transaction {
     	std::vector<std::uint8_t> recoverTxSender();
     	// getters
 		int getNonce(){return (int)bytesVectorToInt(nonce_bytes);};
-		std::string getGasPrice(){return bytesVectorToHexString(gasPrice_bytes);};
+		double getGasPrice(){return hexastr2double("0x"+bytesVectorToHexString(gasPrice_bytes)); };
 		int getGasLimit(){return (int)bytesVectorToInt(gasLimit_bytes);};
 		std::string getTo(){return bytesVectorToHexString(to_bytes);};
-		std::string getValue(){return bytesVectorToHexString(value_bytes);};
+		double getValue(){return hexastr2double("0x"+bytesVectorToHexString(value_bytes)); };
 		std::string getV(){return bytesVectorToHexString(v_bytes);};
 		std::string getR(){return bytesVectorToHexString(r_bytes);};
 		std::string getS(){return bytesVectorToHexString(s_bytes);};

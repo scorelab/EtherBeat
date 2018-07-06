@@ -62,6 +62,15 @@ int hexStringToInt(std::string hexString){
     return x;
 }
 
+double hexastr2double(const std::string& s) {
+
+    double d = 0.0;
+
+    ::sscanf(s.c_str(), "%lA", &d);
+
+    return d;
+}
+
 size_t bytesVectorToInt(std::vector<uint8_t> bytes_arr) {
     size_t dest = 0;
     for (unsigned i = 0; i < bytes_arr.size(); ++i) {

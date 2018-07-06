@@ -20,6 +20,7 @@ std::string hexStr(unsigned char *, int);
 
 //
 int hexStringToInt(std::string);
+double hexastr2double(const std::string& s);
 
 // assembles a byte vector to its integer notation
 size_t bytesVectorToInt(std::vector<uint8_t> bytes_arr);
