@@ -3,6 +3,7 @@
 #include "timing.h"
 #include <sqlite3.h>
 #include <iostream>
+#include <sstream>
 #include <stdio.h>
 
 #define BLOCKS_PER_SQLITE_TRANSACTION 10000
@@ -52,7 +53,24 @@ void parseBlocks(sqlite3 *db_sqlite, rocksdb::DB* db_rocks, struct BuilderInfo &
     endTransaction(db_sqlite);
 }
 
-int main() {
+int main(int argc, char* argv[]) {
+    /*
+    * Process user inputs
+    */
+    if (argc < 2) {
+        std::cout << "specify number of blocks to store in the 1st argument" << std::endl;
+        std::cout << "Command format : EtherBuilder number_of_blocks" << std::endl;
+        return -1;
+    }
+
+    std::istringstream iss(argv[1]);
+    size_t total_blocks_to_store;
+    iss >> total_blocks_to_store;
+    std::cout << "Blocks to store = " << total_blocks_to_store << std::endl;
+
+    /*
+    * Store data
+    */
     // Connect to SQLite
     sqlite3 *db_sqlite;
     int rc = sqlite3_open("/tmp/dbsqlite/ethereum_blockchain.db", &db_sqlite);
@@ -123,9 +141,18 @@ int main() {
 
     // Build started
     size_t parse_start_block = info.nextBlockId;
-    size_t parse_end_block = info.nextBlockId+100000;
+    size_t parse_end_block = total_blocks_to_store+1; // info.nextBlockId+100000;
+
+    if (parse_end_block < parse_start_block) {
+        std::cout << "Blocks to "<< total_blocks_to_store <<" already stored" << std::endl;
+
+        sqlite3_close(db_sqlite);
+        delete db_rocks;
+        return -1;
+    }
 
     size_t total_sqlite_transactions = (parse_end_block-parse_start_block)/BLOCKS_PER_SQLITE_TRANSACTION;
+    if(total_sqlite_transactions == 0)  total_sqlite_transactions = 1;
 
     for(size_t i=0; i<total_sqlite_transactions; i++) {
         size_t local_start = parse_start_block+BLOCKS_PER_SQLITE_TRANSACTION*i;
@@ -133,7 +160,7 @@ int main() {
         if(i==total_sqlite_transactions-1){
             local_end = parse_end_block;
         }
-        std::cout << "Tranasction : " << local_start << " to "<< local_end << std::endl;
+        std::cout << "Tranasction : " << local_start << " to "<< local_end-1 << std::endl;
 
         parseBlocks(db_sqlite, db_rocks, info, extractor, local_start, local_end);
     }
