@@ -2,15 +2,16 @@
  * Created by prabushitha on 5/19/18.
 */
 #include "block.h"
+#include "utils.h"
+#include "address_recover.h"
+#include "rlp.h"
 #include <vector>
 #include <string>
 #include <sstream>
 
-#include "address_recover.h"
-#include "rlp.h"
-
-
-
+/*
+ * Header
+ */
 void Header::print() {
     // printf("---------- Block Header : %d ----------\n", bytesVectorToInt(number));
     printf("parentHash: %s \n",  getParentHash().c_str());
@@ -31,6 +32,25 @@ void Header::print() {
     printf("nonce: %s \n",  getNonce().c_str());
 
 }
+std::string Header::getParentHash(){return bytesVectorToHexString(parentHash_bytes);};
+std::string Header::getSha3Uncles(){return bytesVectorToHexString(sha3Uncles_bytes);};
+std::string Header::getBeneficiary(){return bytesVectorToHexString(beneficiary_bytes);};
+std::string Header::getStateRoot(){return bytesVectorToHexString(stateRoot_bytes);};
+std::string Header::getTransactionsRoot(){return bytesVectorToHexString(transactionsRoot_bytes);};
+std::string Header::getReceiptsRoot(){return bytesVectorToHexString(receiptsRoot_bytes);};
+std::string Header::getLogsBloom(){return bytesVectorToHexString(logsBloom_bytes);};
+size_t Header::getDifficulty(){return bytesVectorToInt(difficulty_bytes);};
+size_t Header::getNumber(){return bytesVectorToInt(number_bytes);};
+size_t Header::getGasLimit(){return bytesVectorToInt(gasLimit_bytes);};
+size_t Header::getGasUsed(){return bytesVectorToInt(gasUsed_bytes);};
+unsigned long Header::getTimestamp(){return bytesVectorToInt(timestamp_bytes);};
+std::string Header::getExtraData(){return bytesVectorToHexString(extraData_bytes);};
+std::string Header::getMixHash(){return bytesVectorToHexString(mixHash_bytes);};
+std::string Header::getNonce(){return bytesVectorToHexString(nonce_bytes);};
+
+/*
+ * Transaction Receipt
+ */
 void TransactionReceipt::print() {
     printf("blockNumber: %d \n", (int)getBlockNumber());
     printf("blockHash: %s \n",  getBlockHash().c_str());
@@ -43,6 +63,19 @@ void TransactionReceipt::print() {
     printf("contractAddress: %s \n",  getContractAddress().c_str());
     printf("gasUsed: %d \n", (int)getGasUsed());
 }
+size_t TransactionReceipt::getBlockNumber(){return blockNumber;};
+size_t TransactionReceipt::getTransactionIndex(){ return transactionIndex;};
+std::string TransactionReceipt::getBlockHash(){return bytesVectorToHexString(blockHash_bytes);};
+std::string TransactionReceipt::getStatus(){return bytesVectorToHexString(status_bytes);};
+size_t TransactionReceipt::getCumulativeGasUsed(){return bytesVectorToInt(cumulativeGasUsed_bytes);};
+std::string TransactionReceipt::getLogsBloom(){return bytesVectorToHexString(logsBloom_bytes);};
+std::string TransactionReceipt::getTransactionHash(){return bytesVectorToHexString(transactionHash_bytes);};
+std::string TransactionReceipt::getContractAddress(){return bytesVectorToHexString(contractAddress_bytes);};
+size_t TransactionReceipt::getGasUsed(){return bytesVectorToInt(gasUsed_bytes);};
+
+/*
+ * Transaction
+ */
 void Transaction::print() {
     printf("nonce: %d \n",  (int)getNonce());
     // printf("nonce: %s \n",  hexStr((unsigned char *)&nonce[0], nonce.size()).c_str());
@@ -61,7 +94,6 @@ void Transaction::print() {
     printf("from: %s \n",  getFrom().c_str());
     printf("hash: %s \n",  getHash().c_str());
 }
-
 std::vector<std::uint8_t> Transaction::recoverTxSender() {
     //tx FROM address
     int chainId = v_bytes[0];
@@ -134,7 +166,37 @@ std::vector<std::uint8_t> Transaction::recoverTxSender() {
 
     return address;
 }
+int Transaction::getNonce(){return (int)bytesVectorToInt(nonce_bytes);};
+double Transaction::getGasPrice(){return hexastr2double("0x"+bytesVectorToHexString(gasPrice_bytes)); };
+int Transaction::getGasLimit(){return (int)bytesVectorToInt(gasLimit_bytes);};
+std::string Transaction::getTo(){return bytesVectorToHexString(to_bytes);};
+double Transaction::getValue(){return hexastr2double("0x"+bytesVectorToHexString(value_bytes)); };
+std::string Transaction::getV(){return bytesVectorToHexString(v_bytes);};
+std::string Transaction::getR(){return bytesVectorToHexString(r_bytes);};
+std::string Transaction::getS(){return bytesVectorToHexString(s_bytes);};
+std::string Transaction::getData(){return bytesVectorToHexString(init_bytes);};
+std::string Transaction::getFrom(){return bytesVectorToHexString(from_bytes);};
+std::string Transaction::getHash(){return bytesVectorToHexString(hash_bytes);};
 
+// value in Gwei => 1 Gwei = 10^9 wei
+// unsigned long getValue(){return bytesVectorToLong(value_bytes);};
+// gas price in Gwei => 1 Gwei = 10^9 wei
+// unsigned long getGasPrice(){ return bytesVectorToLong(gasPrice_bytes);};
+
+std::string Transaction::getType(){
+    if (to_bytes.empty() && !init_bytes.empty()){
+        return "contract creation";
+    } else if(!init_bytes.empty()){
+        return "message call"; // todo : this returns external--->contract txes as message calls. is it okay?
+    }else{
+        return "transaction call";
+    }
+
+}
+
+/*
+ * Block
+ */
 Block::Block(Header header):header(header) {}
 void Block::print() {
     printf("---------- Block : %d ----------\n", bytesVectorToInt(header.number_bytes));
@@ -152,5 +214,17 @@ void Block::print() {
         printf("ommer hash: %s \n",  ommer.c_str());
     }
 }
-
-
+std::vector<std::string> Block::getOmmers(){
+    std::vector<std::string> ommers;
+    int i;
+    for(i=0; i<ommerHashes_bytes.size(); i++) {
+        ommers.insert(ommers.end(), bytesVectorToHexString(ommerHashes_bytes[i]));
+    }
+    return ommers;
+}
+std::vector<Transaction> Block::getTransactions(){
+    return transactions;
+}
+std::string Block::getHash(){
+    return bytesVectorToHexString(hash_bytes);
+}

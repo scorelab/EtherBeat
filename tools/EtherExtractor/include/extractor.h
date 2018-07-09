@@ -24,7 +24,7 @@ class EtherExtractor {
     uint8_t lookupPrefix[1] = {108};  // l : lookupPrefix + hash -> transaction/receipt lookup metadata (BlockHash, BlockIndex, Index)
 
     public:
-        EtherExtractor(std::string db_path);
+        explicit EtherExtractor(std::string db_path);
         ~EtherExtractor() {
             delete db;
         }

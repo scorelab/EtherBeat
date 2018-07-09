@@ -21,15 +21,10 @@ set(HEADERS
         include/block_store.h
         include/sql_statements.h
         include/timing.h
-        include/test_sqlite.h
-)
+        )
 
 
 # create the executable
 add_executable(${PROJECT_NAME} main.cpp ${SOURCES} ${HEADERS})
-
 target_link_libraries (${PROJECT_NAME} rocksdb leveldb cryptopp secp256k1 gtest ethereum_extractor sqlite3 ${BASE_LIBS})
 
-# researching related
-add_executable(test_sqlite test_sqlite.cpp ${SOURCES} ${HEADERS})
-target_link_libraries (test_sqlite rocksdb leveldb cryptopp secp256k1 gtest ethereum_extractor sqlite3 ${BASE_LIBS})
