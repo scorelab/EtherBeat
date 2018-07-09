@@ -3,6 +3,7 @@
 */
 #include "extractor.h"
 #include "rlp.h"
+#include "utils.h"
 #include <vector>
 #include <iostream>
 
