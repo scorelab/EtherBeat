@@ -10,7 +10,6 @@
 #include <string>
 #include <cstdarg>
 
-
 static int callback(void *NotUsed, int argc, char **argv, char **azColName) {
     int i;
     for(i = 0; i<argc; i++) {
@@ -259,12 +258,13 @@ bool isAddressValid(std::string address) {
 }
 
 size_t updateAndGetAccountHashId(rocksdb::DB* db_rocks, std::string hash, struct BuilderInfo &info) {
-    size_t id = -1;
+    size_t id = 0;
     if (isAddressValid(hash)) {
         hash = info.PREFIX_ADDRESS+hash;
         id = getHashId(db_rocks, hash);
 
         if ( id == 0) {
+            // no id is associated with this hash
             id = info.nextAddressId;
             updateHashId(db_rocks, hash, id);
             info.nextAddressId++;
@@ -289,35 +289,88 @@ int endTransaction(sqlite3 *db){
 }
 
 void storeBlockInRDBMS(
-        sqlite3_stmt * stmt_block,
-        sqlite3_stmt * stmt_tx,
-        sqlite3_stmt * stmt_blocktx,
-        sqlite3_stmt * stmt_txreceipt,
-        sqlite3_stmt * stmt_fromto,
-        rocksdb::DB* db_rocks,
-        struct BuilderInfo &info,
-        EtherExtractor &extractor,
+        struct StoreBasicArgs * basic_args,
         Block block
 ) {
 
     /*
      *  Block sqlite and rocksdb
      */
-    bindToBlockSql(stmt_block, block);
+    bindToBlockSql(basic_args->stmt_block, block);
 
     // rocksdb : block hash -> id mapping
-    updateHashId(db_rocks, info.PREFIX_BLOCK+block.getHash(), info.nextBlockId);
+    updateHashId(basic_args->db_rocks, basic_args->info.PREFIX_BLOCK+block.getHash(), basic_args->info.nextBlockId);
 
     /*
      *  Transactions and tx receipt to sqlite and rocksdb
      */
-    for(int i=0;i<block.transactions.size(); i++) {
-        Transaction transaction = block.transactions[i];
-        TransactionReceipt receipt = extractor.getTransactionReceipt(transaction.getHash());
 
-        bindToTxSql(stmt_tx, transaction, info.nextBlockId, info.nextTxId);
-        bindToBlockTxSql(stmt_blocktx, info.nextBlockId, info.nextTxId);
-        bindToTxReceiptSql(stmt_txreceipt, receipt, info.nextTxId);
+    for (const auto &transaction : block.transactions) {
+        pthread_mutex_lock(&(basic_args->txbuffer->mutex));
+
+        // check whether if the buffer is full
+        if(basic_args->txbuffer->occupied >= TX_BUFFER_SIZE) {
+            // wait till consumer process a transaction
+            pthread_cond_wait(&(basic_args->txbuffer->wait_on_full_tx), &(basic_args->txbuffer->mutex));
+        }
+
+        // add a transaction to the buffer
+        basic_args->txbuffer->buffer[basic_args->txbuffer->next_in] = transaction;
+        basic_args->txbuffer->next_in = (basic_args->txbuffer->next_in+1)%TX_BUFFER_SIZE;
+        basic_args->txbuffer->occupied++;
+
+        // signal for consumer if it's waiting on empty buffer
+        pthread_cond_signal(&(basic_args->txbuffer->wait_on_no_tx));
+        pthread_mutex_unlock(&(basic_args->txbuffer->mutex));
+    }
+
+    basic_args->info.nextBlockId++;
+
+    // Todo : transaction roll backs on failure
+}
+
+void * consumer_store_transactions(void * params) {
+    /*
+     * This is the worker function (thread) - To store transactions and accounts.
+     *
+     * It's NOT SAFE to use the following attributes of 'struct BuilderInfo' inside this method
+     * -> nextBlockId
+     *
+     * Reason is nextBlockId is updated by master thread and may not reflect the block id of the transaction processing in this method
+     *
+     * To get the block id use TransactionReceipt's block number
+     */
+    auto * basic_args = (struct StoreBasicArgs *)params;
+
+    while((!(*(basic_args->isMasterOver))) || (*(basic_args->isMasterOver) && basic_args->txbuffer->occupied > 0) ) {
+        pthread_mutex_lock(&(basic_args->txbuffer->mutex));
+
+        // check whether if there's new transactions added to the buffer
+        if(basic_args->txbuffer->occupied <= 0) {
+            // wait till a transaction is added to the buffer
+            pthread_cond_wait(&(basic_args->txbuffer->wait_on_no_tx), &(basic_args->txbuffer->mutex));
+        }
+
+        if (basic_args->txbuffer->occupied == 0) {
+            pthread_mutex_unlock(&(basic_args->txbuffer->mutex));
+            break;
+        }
+        // get the next transaction from the buffer to process
+        Transaction transaction = basic_args->txbuffer->buffer[basic_args->txbuffer->next_out];
+        basic_args->txbuffer->next_out = (basic_args->txbuffer->next_out+1)%TX_BUFFER_SIZE;
+        basic_args->txbuffer->occupied --;
+
+        // signal for producer if it's waiting on the full buffer
+        pthread_cond_signal(&(basic_args->txbuffer->wait_on_full_tx));
+        pthread_mutex_unlock(&(basic_args->txbuffer->mutex));
+
+        TransactionReceipt receipt = basic_args->extractor.getTransactionReceipt(transaction.getHash());
+
+        size_t block_id = receipt.getBlockNumber();
+
+        bindToTxSql(basic_args->stmt_tx, transaction, block_id, basic_args->info.nextTxId);
+        bindToBlockTxSql(basic_args->stmt_blocktx, block_id, basic_args->info.nextTxId);
+        bindToTxReceiptSql(basic_args->stmt_txreceipt, receipt, basic_args->info.nextTxId);
 
         /*
          * todo
@@ -326,27 +379,22 @@ void storeBlockInRDBMS(
          */
 
         // rocksdb : transaction hash -> id mapping
-        updateHashId(db_rocks, info.PREFIX_TX+transaction.getHash(), info.nextTxId);
+        updateHashId(basic_args->db_rocks, basic_args->info.PREFIX_TX+transaction.getHash(), basic_args->info.nextTxId);
 
         // rocksdb : address -> id mapping (get existing id if exists, otherwise new id will be created)
-        size_t senderId = updateAndGetAccountHashId(db_rocks, transaction.getFrom(), info);
-        size_t receiverId = updateAndGetAccountHashId(db_rocks, transaction.getTo(), info);
+        size_t senderId = updateAndGetAccountHashId(basic_args->db_rocks, transaction.getFrom(), basic_args->info);
+        size_t receiverId = updateAndGetAccountHashId(basic_args->db_rocks, transaction.getTo(), basic_args->info);
 
         // if there's a sender and a receiver for a transaction, should insert to fromto table
-        if (senderId != -1 && receiverId != -1) {
+        if (senderId > 0 && receiverId > 0) {
             // sql string to insert from-to
-            bindToFromtoSql(stmt_fromto, senderId, receiverId, transaction.getValue(), info.nextTxId);
+            bindToFromtoSql(basic_args->stmt_fromto, senderId, receiverId, transaction.getValue(), basic_args->info.nextTxId);
         } else {
             // NOT A NORMAL TRANSACTION
         }
 
-        info.nextTxId++;
+        basic_args->info.nextTxId++;
     }
-
-
-    info.nextBlockId++;
-
-    // Todo : transaction roll backs on failure
 }
 
 

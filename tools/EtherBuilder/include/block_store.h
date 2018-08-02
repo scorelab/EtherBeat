@@ -5,12 +5,14 @@
 #include "rocksdb/db.h"
 #include <sqlite3.h>
 #include <iostream>
+#include <pthread.h>
 #include <stdio.h>
 #include <sstream>
 #include <string>
 #include <cstdarg>
 
 
+#define TX_BUFFER_SIZE 1000
 
 struct BuilderInfo {
     std::string KEY_NEXT_BLOCKID = "info_next_block_id";
@@ -26,6 +28,31 @@ struct BuilderInfo {
     std::string PREFIX_ADDRESS = "address_";
 };
 
+struct TransactionBuffer {
+    Transaction buffer[TX_BUFFER_SIZE];
+    int next_in=0;
+    int next_out=0;
+
+    int occupied=0;
+
+    pthread_mutex_t mutex{};
+    pthread_cond_t wait_on_no_tx{};
+    pthread_cond_t wait_on_full_tx{};
+
+};
+
+struct StoreBasicArgs {
+    sqlite3_stmt * stmt_block;
+    sqlite3_stmt * stmt_tx;
+    sqlite3_stmt * stmt_blocktx;
+    sqlite3_stmt * stmt_txreceipt;
+    sqlite3_stmt * stmt_fromto;
+    rocksdb::DB* db_rocks;
+    struct BuilderInfo &info;
+    EtherExtractor &extractor;
+    bool * isMasterOver;
+    struct TransactionBuffer * txbuffer;
+};
 
 int run_sql_query(sqlite3 *db, std::string sql, std::string title);
 
@@ -50,13 +77,7 @@ size_t updateAndGetAccountHashId(rocksdb::DB* db_rocks, std::string hash, struct
 int startTransaction(sqlite3 *db);
 int endTransaction(sqlite3 *db);
 
-void storeBlockInRDBMS(sqlite3_stmt * stmt_block,
-                       sqlite3_stmt * stmt_tx,
-                       sqlite3_stmt * stmt_blocktx,
-                       sqlite3_stmt * stmt_txreceipt,
-                       sqlite3_stmt * stmt_fromto,
-                       rocksdb::DB* db_rocks,
-                       struct BuilderInfo &info,
-                       EtherExtractor &extractor,
+void storeBlockInRDBMS(struct StoreBasicArgs * basic_args,
                        Block block);
 
+void * consumer_store_transactions(void * params);

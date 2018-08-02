@@ -8,6 +8,7 @@
 
 #define BLOCKS_PER_SQLITE_TRANSACTION 10000
 
+struct TransactionBuffer txbuffer;
 void parseBlocks(sqlite3 *db_sqlite, rocksdb::DB* db_rocks, struct BuilderInfo &info, EtherExtractor &extractor, size_t start, size_t end) {
     // start a transaction
     startTransaction(db_sqlite);
@@ -28,20 +29,30 @@ void parseBlocks(sqlite3 *db_sqlite, rocksdb::DB* db_rocks, struct BuilderInfo &
     sqlite3_stmt * stmt_fromto = nullptr;
     int rc5 = sqlite3_prepare(db_sqlite, sql_fromto, -1, &stmt_fromto, nullptr);
 
+    bool isMasterOver = false;
+    struct StoreBasicArgs basicArgs = {stmt_block,
+    stmt_tx,
+    stmt_blocktx,
+    stmt_txreceipt,
+    stmt_fromto,
+    db_rocks,
+    info,
+    extractor,
+    &isMasterOver,
+    &txbuffer};
+
+    // create a worker thread
+    pthread_t tid;
+    pthread_create(&tid, NULL, consumer_store_transactions, (void *)&basicArgs);
     // parse
     for(size_t i=start; i<end; i++) {
         Block block = extractor.getBlock(i);
 
-        storeBlockInRDBMS(stmt_block,
-                          stmt_tx,
-                          stmt_blocktx,
-                          stmt_txreceipt,
-                          stmt_fromto,
-                          db_rocks,
-                          info,
-                          extractor,
-                          block);
+        storeBlockInRDBMS(&basicArgs, block);
     }
+    isMasterOver = true;
+    pthread_cond_signal(&(basicArgs.txbuffer->wait_on_no_tx));
+    pthread_join(tid, NULL);
 
     // finalize
     sqlite3_finalize(stmt_block);
@@ -127,7 +138,12 @@ int main(int argc, char* argv[]) {
 
     EtherExtractor extractor("/home/prabushitha/.ethereum/rinkeby/geth/chaindata");
 
+    // Initializing thread parameters
+    pthread_mutex_init(&(txbuffer.mutex), NULL);
+    pthread_cond_init(&(txbuffer.wait_on_no_tx), NULL);
+    pthread_cond_init(&(txbuffer.wait_on_full_tx), NULL);
 
+    // Parsing
     std::cout << "starting block id \t" << info.nextBlockId << std::endl;
     std::cout << "starting tx id    \t" << info.nextTxId << std::endl;
     std::cout << "starting addr id  \t" << info.nextAddressId << std::endl;
@@ -164,8 +180,6 @@ int main(int argc, char* argv[]) {
 
         parseBlocks(db_sqlite, db_rocks, info, extractor, local_start, local_end);
     }
-
-
 
     // Build over
     timer.printElapsedTime();
