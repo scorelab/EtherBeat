@@ -123,13 +123,13 @@ int main(int argc, char* argv[]) {
 
     }else {
         printf("keys not found \n");
-        info.nextBlockId = 1;
+        info.nextBlockId = 0;
         info.nextTxId = 1;
         info.nextAddressId = 1;
     }
 
     // if the value are set to initial values, we need to start from the beginning.
-    if (info.nextBlockId == 1 && info.nextTxId == 1) {
+    if (info.nextBlockId == 0 && info.nextTxId == 1) {
         // create database tables
         createRDBMSSchema(db_sqlite);
     }
@@ -167,8 +167,10 @@ int main(int argc, char* argv[]) {
         return -1;
     }
 
-    size_t total_sqlite_transactions = (parse_end_block-parse_start_block)/BLOCKS_PER_SQLITE_TRANSACTION;
-    if(total_sqlite_transactions == 0)  total_sqlite_transactions = 1;
+    size_t total_blocks_to_parse = parse_end_block-parse_start_block;
+    size_t total_sqlite_transactions = (total_blocks_to_parse/BLOCKS_PER_SQLITE_TRANSACTION)+1;
+    if (total_blocks_to_parse == (total_sqlite_transactions-1)*BLOCKS_PER_SQLITE_TRANSACTION) total_sqlite_transactions -= 1;
+    // if(total_sqlite_transactions == 0)  total_sqlite_transactions = 1;
 
     for(size_t i=0; i<total_sqlite_transactions; i++) {
         size_t local_start = parse_start_block+BLOCKS_PER_SQLITE_TRANSACTION*i;
@@ -176,7 +178,7 @@ int main(int argc, char* argv[]) {
         if(i==total_sqlite_transactions-1){
             local_end = parse_end_block;
         }
-        std::cout << "Tranasction : " << local_start << " to "<< local_end-1 << std::endl;
+        std::cout << "Blocks : " << local_start << " to "<< local_end << " (excluding)" << std::endl;
 
         parseBlocks(db_sqlite, db_rocks, info, extractor, local_start, local_end);
     }

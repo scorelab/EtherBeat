@@ -18,4 +18,4 @@ rm -R /tmp/dbsqlite
 mkdir /tmp/dbrocks
 mkdir /tmp/dbsqlite
 
-./EtherBuilder 100000
+./EtherBuilder 99999
