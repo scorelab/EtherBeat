@@ -25,6 +25,6 @@ set(HEADERS
 
 
 # create the executable
-add_executable(${PROJECT_NAME} main.cpp ${SOURCES} ${HEADERS})
+add_executable(${PROJECT_NAME} src/main.cpp ${SOURCES} ${HEADERS})
 target_link_libraries (${PROJECT_NAME} rocksdb leveldb cryptopp secp256k1 gtest ethereum_extractor sqlite3 pthread ${BASE_LIBS})
 
