@@ -7,6 +7,7 @@ tar -xvzf cmake-3.10.1.tar.gz
 cd cmake-3.10.1/ 
 ./configure 
 make
+sudo make install
 
 # cryptopp
 git clone https://github.com/weidai11/cryptopp.git
