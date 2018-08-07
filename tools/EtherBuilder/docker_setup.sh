@@ -1,6 +1,13 @@
 #!/usr/bin/env bash
 
 # dependencies
+# cryptopp
+git clone https://github.com/weidai11/cryptopp.git
+cd cryptopp
+make
+make test
+sudo make install
+cd ../
 
 #secp256k1
 # sudo apt-get install autoconf autogen libtool

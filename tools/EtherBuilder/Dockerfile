@@ -15,10 +15,6 @@ RUN apt-get update && apt-get install -y build-essential \
     wget \
     git \
     libsnappy-dev \
-    libcrypto++ \
-    libcrypto++-dev \
-    libcrypto++9v5-dbg \
-    libcrypto++-utils \
     autoconf \
     autogen \
     libtool \
