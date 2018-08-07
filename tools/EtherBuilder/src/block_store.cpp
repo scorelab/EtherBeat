@@ -105,6 +105,13 @@ void createRDBMSSchema(sqlite3 *db) {
              "amount REAL," \
              "txId INT);" ;
 
+    std::string accountTable = "DROP TABLE IF EXISTS account;" \
+    "CREATE TABLE IF NOT EXISTS account("  \
+             "id INT PRIMARY KEY     NOT NULL," \
+             "address INT NOT NULL," \
+             "isContract INT NOT NULL," \
+             "amount REAL);" ;
+
 
 
     std::stringstream ss;
