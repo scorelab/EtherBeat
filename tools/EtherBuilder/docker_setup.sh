@@ -32,4 +32,4 @@ cd EtherBeat
 git checkout parser
 cd tools/EtherExtractor
 chmod +x run.sh
-./run
+./run.sh
