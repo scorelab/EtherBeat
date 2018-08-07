@@ -15,8 +15,8 @@ RUN apt-get update && apt-get install -y build-essential \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
-ADD setup.sh /setup.sh
-RUN chmod +x /setup.sh
+ADD setup.sh /docker_setup.sh
+RUN chmod +x /docker_setup.sh
 
 CMD ["/bin/bash"]
-ENTRYPOINT ["/setup.sh"]
+ENTRYPOINT ["/docker_setup.sh"]
