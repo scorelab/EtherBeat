@@ -44,6 +44,12 @@ Tool to store ethereum blockchain in order to support analysis. SQLite database 
 
 `./run.sh`
 
+## Docker Guide
+
+1. build
+   - `docker build -t ether_builder .`
+2. run
+   - `docker run -it ether_builder /bin/bash`
 
 ## Functionality list
 

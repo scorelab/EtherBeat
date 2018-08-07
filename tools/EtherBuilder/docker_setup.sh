@@ -1,6 +1,13 @@
 #!/usr/bin/env bash
 
 # dependencies
+# cmake
+wget http://www.cmake.org/files/v3.10/cmake-3.10.1.tar.gz 
+tar -xvzf cmake-3.10.1.tar.gz 
+cd cmake-3.10.1/ 
+./configure 
+make
+
 # cryptopp
 git clone https://github.com/weidai11/cryptopp.git
 cd cryptopp
