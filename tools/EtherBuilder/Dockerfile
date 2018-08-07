@@ -4,6 +4,8 @@ MAINTAINER Umesh Jayasinghe
 RUN apt-get update && apt-get install -y build-essential \
     sudo \
     cmake \
+    gcc \
+    g++ \
     libboost-all-dev \
     libprotobuf-dev \
     protobuf-compiler \
