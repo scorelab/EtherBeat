@@ -2,7 +2,7 @@
 
 # dependencies
 # leveldb
-sudo apt-get install libsnappy-dev
+# sudo apt-get install libsnappy-dev
 
 wget https://leveldb.googlecode.com/files/leveldb-1.9.0.tar.gz
 tar -xzf leveldb-1.9.0.tar.gz
@@ -13,11 +13,8 @@ cd include
 sudo cp -R leveldb /usr/local/include
 sudo ldconfig
 
-#cryptopp
-apt-get install libcrypto++ libcrypto++-dev libcrypto++9v5-dbg libcrypto++-utils
-
 #secp256k1
-sudo apt-get install autoconf autogen libtool
+# sudo apt-get install autoconf autogen libtool
 git clone https://github.com/bitcoin-core/secp256k1.git
 cd secp256k1
 ./autogen.sh
@@ -27,7 +24,7 @@ make
 sudo make install  # optional
 
 # gtest
-sudo apt-get install libgtest-dev
+# sudo apt-get install libgtest-dev
 
 # project
 git clone https://github.com/prabushitha/EtherBeat.git

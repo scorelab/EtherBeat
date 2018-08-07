@@ -12,10 +12,19 @@ RUN apt-get update && apt-get install -y build-essential \
     ninja-build \
     wget \
     git \
+    libsnappy-dev \
+    libcrypto++ \
+    libcrypto++-dev \
+    libcrypto++9v5-dbg \
+    libcrypto++-utils \
+    autoconf \
+    autogen \
+    libtool \
+    libgtest-dev \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
-ADD setup.sh /docker_setup.sh
+ADD docker_setup.sh /docker_setup.sh
 RUN chmod +x /docker_setup.sh
 
 CMD ["/bin/bash"]
