@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 2.8.9)
 
 
-project(ethereum_extractor DESCRIPTION "Library to extract ethereum raw data from leveldb")
+# project(ethereum_extractor DESCRIPTION "Library to extract ethereum raw data from leveldb")
 
 #Define project name
 set(PROJECT_NAME "ethereum_extractor")
