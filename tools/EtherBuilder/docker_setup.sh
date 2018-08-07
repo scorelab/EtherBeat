@@ -11,14 +11,14 @@ cd secp256k1
 make
 ./tests
 sudo make install  # optional
-
+export LD_LIBRARY_PATH=/usr/local/lib
 # gtest
 # sudo apt-get install libgtest-dev
-
+cd ..
 # project
 git clone https://github.com/prabushitha/EtherBeat.git
 cd EtherBeat
 git checkout parser
 cd tools/EtherExtractor
-chmod +x run.sh
-./run.sh
+# chmod +x run.sh
+# ./run.sh

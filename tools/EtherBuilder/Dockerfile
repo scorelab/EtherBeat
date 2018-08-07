@@ -31,4 +31,3 @@ ADD docker_setup.sh /docker_setup.sh
 RUN chmod +x /docker_setup.sh
 
 CMD ["/bin/bash"]
-ENTRYPOINT ["/docker_setup.sh"]
