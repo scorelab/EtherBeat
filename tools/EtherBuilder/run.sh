@@ -1,6 +1,4 @@
 #!/usr/bin/env bash
-#project_dir='./tools/parser'
-#cd ${project_dir}
 
 export LD_LIBRARY_PATH=/usr/local/lib
 
@@ -19,4 +17,4 @@ rm -R /tmp/dbsqlite
 mkdir /tmp/dbrocks
 mkdir /tmp/dbsqlite
 
-./EtherBuilder 99999
+./EtherBuilder $1 $2

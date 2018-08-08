@@ -68,23 +68,43 @@ int main(int argc, char* argv[]) {
     /*
     * Process user inputs
     */
+    std::string chain_path = "/mnt/rinkeby/geth/chaindata"; // setting default path
+    std::string sqlite_path = "/tmp/dbsqlite";
+    std::string rocks_path = "/tmp/dbrocks";
     if (argc < 2) {
-        std::cout << "specify number of blocks to store in the 1st argument" << std::endl;
-        std::cout << "Command format : EtherBuilder number_of_blocks" << std::endl;
+        std::cout << "Mandatory to specify number of blocks to store in the 1st argument" << std::endl;
+        std::cout << "Command format : EtherBuilder number_of_blocks [chain_path sqlite_path rocks_path]" << std::endl;
+        std::cout << "Example :" << std::endl;
+        std::cout << "./EtherBuilder 10000 /home/user/.ethereum/geth/chaindata /tmp/dbsqlite /tmp/dbrocks" << std::endl;
         return -1;
     }
+
+    if (argc > 2) {
+        std::istringstream cpath(argv[2]);
+        cpath >> chain_path;
+    }
+    std::cout << "Using chain data path : " << chain_path << std::endl;
 
     std::istringstream iss(argv[1]);
     size_t total_blocks_to_store;
     iss >> total_blocks_to_store;
     std::cout << "Blocks to store = " << total_blocks_to_store << std::endl;
 
+    if (argc > 3) {
+        std::istringstream spath(argv[3]);
+        spath >> sqlite_path;
+    }
+    if (argc > 4) {
+        std::istringstream rpath(argv[4]);
+        rpath >> rocks_path;
+    }
+    sqlite_path = sqlite_path+"/ethereum_blockchain.db";
     /*
     * Store data
     */
     // Connect to SQLite
     sqlite3 *db_sqlite;
-    int rc = sqlite3_open("/tmp/dbsqlite/ethereum_blockchain.db", &db_sqlite);
+    int rc = sqlite3_open(&sqlite_path[0], &db_sqlite);
 
     if( rc ) {
         fprintf(stderr, "SQLite db failed : %s\n", sqlite3_errmsg(db_sqlite));
@@ -97,7 +117,7 @@ int main(int argc, char* argv[]) {
     rocksdb::DB* db_rocks;
     rocksdb::Options options;
     options.create_if_missing = true;
-    rocksdb::Status status = rocksdb::DB::Open(options, "/tmp/dbrocks", &db_rocks);
+    rocksdb::Status status = rocksdb::DB::Open(options, rocks_path, &db_rocks);
     if(status.ok()){
         printf("Rocksdb connected\n");
     }else{
@@ -136,7 +156,7 @@ int main(int argc, char* argv[]) {
 
 
 
-    EtherExtractor extractor("/home/prabushitha/.ethereum/rinkeby/geth/chaindata");
+    EtherExtractor extractor(chain_path);
 
     // Initializing thread parameters
     pthread_mutex_init(&(txbuffer.mutex), NULL);

@@ -59,10 +59,13 @@ sudo make
 sudo cp *.so /usr/lib
 cd ../
 
-# project
+# project setup
 git clone https://github.com/prabushitha/EtherBeat.git
 cd EtherBeat
 git checkout parser
 cd tools/EtherExtractor
-chmod +x run.sh
-# ./run.sh
+chmod +x build_library.sh
+./build_library.sh
+
+
+

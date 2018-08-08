@@ -42,17 +42,23 @@ Tool to store ethereum blockchain in order to support analysis. SQLite database 
 
 ### Running Builder
 
-`./run.sh`
+Let's parse 100000 blocks. you can change the value. Also give the correct path to the blockchain containing chaindata directory.
+
+`./run.sh 100000 /path/to/chaindata`
 
 ## Docker Guide
 
-1. build
+1. docker build
    - `docker build -t ether_builder .`
-2. run
-   - `docker run -it ether_builder /bin/bash`
-3. compile dependencies
+2. docker run (note that `/home/user/.ethereum` is the host directory containing synced blockchain)
+   - `docker run -v /home/user/.ethereum:/mnt -it ether_builder /bin/bash`
+3. compile other dependencies
    - `cd /usr/src`
    - `./docker_setup.sh`
+4. run (Let's parse 100000 blocks. you can change the value)
+   - `cd /usr/src/EtherBeat/tools/EtherBuilder`
+   - `./run 100000`
+
 
 ## Functionality list
 
