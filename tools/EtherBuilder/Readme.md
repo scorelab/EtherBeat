@@ -57,7 +57,7 @@ Let's parse 100000 blocks. you can change the value. Also give the correct path 
    - `./docker_setup.sh`
 4. run (Let's parse 100000 blocks. you can change the value)
    - `cd /usr/src/EtherBeat/tools/EtherBuilder`
-   - `./run 100000`
+   - `./run.sh 100000`
 
 
 ## Functionality list

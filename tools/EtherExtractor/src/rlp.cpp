@@ -5,7 +5,7 @@
 
 #include <cstring>
 #include <cstdint>
-#include<stdexcept>
+#include <stdexcept>
 
 using namespace std;
 
