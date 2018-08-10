@@ -1,15 +1,19 @@
 /*
  * Created by prabushitha on 6/12/18.
+ * Copyright [2018] <Umesh Jayasinghe>
 */
-#include "extractor.h"
+#ifndef TOOLS_ETHERBUILDER_INCLUDE_BLOCK_STORE_H_
+#define TOOLS_ETHERBUILDER_INCLUDE_BLOCK_STORE_H_
+
 #include "rocksdb/db.h"
+#include "extractor.h"
 #include <sqlite3.h>
-#include <iostream>
 #include <pthread.h>
-#include <stdio.h>
+#include <iostream>
+#include <cstdarg>
+#include <cstdio>
 #include <sstream>
 #include <string>
-#include <cstdarg>
 
 
 #define TX_BUFFER_SIZE 1000
@@ -30,15 +34,12 @@ struct BuilderInfo {
 
 struct TransactionBuffer {
     Transaction buffer[TX_BUFFER_SIZE];
-    int next_in=0;
-    int next_out=0;
-
-    int occupied=0;
-
-    pthread_mutex_t mutex{};
-    pthread_cond_t wait_on_no_tx{};
-    pthread_cond_t wait_on_full_tx{};
-
+    int next_in = 0;
+    int next_out = 0;
+    int occupied = 0;
+    pthread_mutex_t mutex {};
+    pthread_cond_t wait_on_no_tx {};
+    pthread_cond_t wait_on_full_tx {};
 };
 
 struct StoreBasicArgs {
@@ -59,20 +60,36 @@ int run_sql_query(sqlite3 *db, std::string sql, std::string title);
 void createRDBMSSchema(sqlite3 *db);
 void bindToBlockSql(sqlite3_stmt * stmt, Block b);
 
-void bindToTxSql(sqlite3_stmt * stmt, Transaction transaction, size_t blockId, size_t txId);
+void bindToTxSql(sqlite3_stmt * stmt,
+                Transaction transaction,
+                 size_t blockId,
+                 size_t txId);
 
-void bindToBlockTxSql(sqlite3_stmt * stmt, size_t blockId, size_t txId);
+void bindToBlockTxSql(sqlite3_stmt * stmt,
+                      size_t blockId,
+                      size_t txId);
 
-void bindToTxReceiptSql(sqlite3_stmt * stmt, TransactionReceipt receipt, size_t txId);
+void bindToTxReceiptSql(sqlite3_stmt * stmt,
+                        TransactionReceipt receipt,
+                        size_t txId);
 
-void bindToFromtoSql(sqlite3_stmt * stmt, size_t from, size_t to, double amount, size_t txid);
+void bindToFromtoSql(sqlite3_stmt * stmt,
+                     size_t from,
+                     size_t to,
+                     double amount,
+                     size_t txid);
 
-size_t getHashId(rocksdb::DB* db_rocks, std::string hash);
-bool updateHashId(rocksdb::DB* db_rocks, std::string hash, int id);
+size_t getHashId(rocksdb::DB* db_rocks,
+                 std::string hash);
+
+bool updateHashId(rocksdb::DB* db_rocks,
+                  std::string hash, int id);
 
 bool isAddressValid(std::string address);
 
-size_t updateAndGetAccountHashId(rocksdb::DB* db_rocks, std::string hash, struct BuilderInfo &info);
+size_t updateAndGetAccountHashId(rocksdb::DB* db_rocks,
+                                 std::string hash,
+                                 struct BuilderInfo &info);
 
 int startTransaction(sqlite3 *db);
 int endTransaction(sqlite3 *db);
@@ -81,3 +98,5 @@ void storeBlockInRDBMS(struct StoreBasicArgs * basic_args,
                        Block block);
 
 void * consumer_store_transactions(void * params);
+
+#endif  // TOOLS_ETHERBUILDER_INCLUDE_BLOCK_STORE_H_

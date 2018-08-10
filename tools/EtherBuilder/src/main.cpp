@@ -1,33 +1,43 @@
+/*
+ * Created by prabushitha on 6/12/18.
+ * Copyright [2018] <Umesh Jayasinghe>
+*/
+
 #include "block_store.h"
 #include "sql_statements.h"
 #include "timing.h"
 #include <sqlite3.h>
 #include <iostream>
 #include <sstream>
-#include <stdio.h>
+#include <cstdio>
 
 #define BLOCKS_PER_SQLITE_TRANSACTION 10000
 
 struct TransactionBuffer txbuffer;
-void parseBlocks(sqlite3 *db_sqlite, rocksdb::DB* db_rocks, struct BuilderInfo &info, EtherExtractor &extractor, size_t start, size_t end) {
+void parseBlocks(sqlite3 *db_sqlite,
+                 rocksdb::DB* db_rocks,
+                 struct BuilderInfo &info,
+                 EtherExtractor &extractor,
+                 size_t start,
+                 size_t end) {
     // start a transaction
     startTransaction(db_sqlite);
 
 
     sqlite3_stmt * stmt_block = nullptr;
-    int rc1 = sqlite3_prepare(db_sqlite, sql_block, -1, &stmt_block, nullptr);
+    sqlite3_prepare(db_sqlite, sql_block, -1, &stmt_block, nullptr);
 
     sqlite3_stmt * stmt_tx = nullptr;
-    int rc2 = sqlite3_prepare(db_sqlite, sql_tx, -1, &stmt_tx, nullptr);
+    sqlite3_prepare(db_sqlite, sql_tx, -1, &stmt_tx, nullptr);
 
     sqlite3_stmt * stmt_blocktx = nullptr;
-    int rc3 = sqlite3_prepare(db_sqlite, sql_blocktx, -1, &stmt_blocktx, nullptr);
+    sqlite3_prepare(db_sqlite, sql_blocktx, -1, &stmt_blocktx, nullptr);
 
     sqlite3_stmt * stmt_txreceipt = nullptr;
-    int rc4 = sqlite3_prepare(db_sqlite, sql_txreceipt, -1, &stmt_txreceipt, nullptr);
+    sqlite3_prepare(db_sqlite, sql_txreceipt, -1, &stmt_txreceipt, nullptr);
 
     sqlite3_stmt * stmt_fromto = nullptr;
-    int rc5 = sqlite3_prepare(db_sqlite, sql_fromto, -1, &stmt_fromto, nullptr);
+    sqlite3_prepare(db_sqlite, sql_fromto, -1, &stmt_fromto, nullptr);
 
     bool isMasterOver = false;
     struct StoreBasicArgs basicArgs = {stmt_block,
@@ -43,16 +53,16 @@ void parseBlocks(sqlite3 *db_sqlite, rocksdb::DB* db_rocks, struct BuilderInfo &
 
     // create a worker thread
     pthread_t tid;
-    pthread_create(&tid, NULL, consumer_store_transactions, (void *)&basicArgs);
+    pthread_create(&tid, nullptr, consumer_store_transactions, reinterpret_cast<void *>(&basicArgs));
     // parse
-    for(size_t i=start; i<end; i++) {
+    for (size_t i = start; i < end; i++) {
         Block block = extractor.getBlock(i);
 
         storeBlockInRDBMS(&basicArgs, block);
     }
     isMasterOver = true;
     pthread_cond_signal(&(basicArgs.txbuffer->wait_on_no_tx));
-    pthread_join(tid, NULL);
+    pthread_join(tid, nullptr);
 
     // finalize
     sqlite3_finalize(stmt_block);
@@ -68,7 +78,9 @@ int main(int argc, char* argv[]) {
     /*
     * Process user inputs
     */
-    std::string chain_path = "/mnt/rinkeby/geth/chaindata"; // setting default path
+
+    // setting default path
+    std::string chain_path = "/mnt/rinkeby/geth/chaindata";
     std::string sqlite_path = "/tmp/dbsqlite";
     std::string rocks_path = "/tmp/dbrocks";
     if (argc < 2) {
@@ -98,7 +110,7 @@ int main(int argc, char* argv[]) {
         std::istringstream rpath(argv[4]);
         rpath >> rocks_path;
     }
-    sqlite_path = sqlite_path+"/ethereum_blockchain.db";
+    sqlite_path = sqlite_path + "/ethereum_blockchain.db";
     /*
     * Store data
     */
@@ -106,7 +118,7 @@ int main(int argc, char* argv[]) {
     sqlite3 *db_sqlite;
     int rc = sqlite3_open(&sqlite_path[0], &db_sqlite);
 
-    if( rc ) {
+    if (rc) {
         fprintf(stderr, "SQLite db failed : %s\n", sqlite3_errmsg(db_sqlite));
         return(0);
     } else {
@@ -118,9 +130,9 @@ int main(int argc, char* argv[]) {
     rocksdb::Options options;
     options.create_if_missing = true;
     rocksdb::Status status = rocksdb::DB::Open(options, rocks_path, &db_rocks);
-    if(status.ok()){
+    if (status.ok()) {
         printf("Rocksdb connected\n");
-    }else{
+    } else {
         printf("Rocksdb failed : %s \n",  status.ToString().c_str());
     }
 
@@ -137,11 +149,11 @@ int main(int argc, char* argv[]) {
 
     if (s1.ok() && s2.ok() && s3.ok()) {
         printf("Rocks last %s\n Rocks last tx %s\n", nextBlockId.c_str(), nextTxId.c_str());
-        info.nextBlockId = (size_t)std::stoi( nextBlockId );
-        info.nextTxId = (size_t)std::stoi( nextTxId );
-        info.nextAddressId = (size_t)std::stoi( nextAddressId );
+        info.nextBlockId = (size_t)std::stoi(nextBlockId);
+        info.nextTxId = (size_t)std::stoi(nextTxId);
+        info.nextAddressId = (size_t)std::stoi(nextAddressId);
 
-    }else {
+    } else {
         printf("keys not found \n");
         info.nextBlockId = 0;
         info.nextTxId = 1;
@@ -177,7 +189,7 @@ int main(int argc, char* argv[]) {
 
     // Build started
     size_t parse_start_block = info.nextBlockId;
-    size_t parse_end_block = total_blocks_to_store+1; // info.nextBlockId+100000;
+    size_t parse_end_block = total_blocks_to_store+1;  // info.nextBlockId+100000;
 
     if (parse_end_block < parse_start_block) {
         std::cout << "Blocks to "<< total_blocks_to_store <<" already stored" << std::endl;
@@ -192,10 +204,10 @@ int main(int argc, char* argv[]) {
     if (total_blocks_to_parse == (total_sqlite_transactions-1)*BLOCKS_PER_SQLITE_TRANSACTION) total_sqlite_transactions -= 1;
     // if(total_sqlite_transactions == 0)  total_sqlite_transactions = 1;
 
-    for(size_t i=0; i<total_sqlite_transactions; i++) {
+    for (size_t i = 0; i < total_sqlite_transactions; i++) {
         size_t local_start = parse_start_block+BLOCKS_PER_SQLITE_TRANSACTION*i;
         size_t local_end = local_start+BLOCKS_PER_SQLITE_TRANSACTION;
-        if(i==total_sqlite_transactions-1){
+        if (i == total_sqlite_transactions-1) {
             local_end = parse_end_block;
         }
         std::cout << "Blocks : " << local_start << " to "<< local_end << " (excluding)" << std::endl;

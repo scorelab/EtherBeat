@@ -1,5 +1,6 @@
 /*
  * Created by prabushitha on 7/1/18.
+ * Copyright [2018] <Umesh Jayasinghe>
 */
 #include "block_store.h"
 #include "rocksdb/db.h"
@@ -12,32 +13,27 @@
 
 static int callback(void *NotUsed, int argc, char **argv, char **azColName) {
     int i;
-    for(i = 0; i<argc; i++) {
+    for (i = 0; i < argc; i++) {
         printf("%s = %s\n", azColName[i], argv[i] ? argv[i] : "NULL");
     }
     printf("\n");
     return 0;
 }
 
-int run_sql_query(sqlite3 *db, std::string sql, std::string title="Query Execution") {
-    char *zErrMsg = 0;
-    int rc;
+int run_sql_query(sqlite3 *db, std::string sql, std::string title = "Query Execution") {
+    char *zErrMsg = nullptr;
+    int rc = sqlite3_exec(db, sql.c_str(), callback, nullptr, &zErrMsg);
 
-
-    rc = sqlite3_exec(db, sql.c_str(), callback, 0, &zErrMsg);
-
-    if( rc != SQLITE_OK ){
+    if ( rc != SQLITE_OK ) {
         printf("SQL error (%s): %s\n", title.c_str(), zErrMsg);
         sqlite3_free(zErrMsg);
         return 0;
     } else {
-        // printf("%s successful\n", title.c_str());
         return 1;
     }
 }
 
 void createRDBMSSchema(sqlite3 *db) {
-    // sqlite> PRAGMA foreign_keys = ON;
     char *zErrMsg = 0;
     int rc;
 
@@ -96,23 +92,21 @@ void createRDBMSSchema(sqlite3 *db) {
              "txId INT NOT NULL," \
              "FOREIGN KEY (blockId) REFERENCES Block(id)," \
              "FOREIGN KEY (txId) REFERENCES Tx(id)," \
-             "PRIMARY KEY (blockId, txId));" ;
+             "PRIMARY KEY (blockId, txId));";
 
     std::string accountTxTable = "DROP TABLE IF EXISTS fromto;" \
     "CREATE TABLE IF NOT EXISTS fromto("  \
              "sender INT NOT NULL," \
              "receiver INT NOT NULL," \
              "amount REAL," \
-             "txId INT);" ;
+             "txId INT);";
 
     std::string accountTable = "DROP TABLE IF EXISTS account;" \
     "CREATE TABLE IF NOT EXISTS account("  \
              "id INT PRIMARY KEY     NOT NULL," \
              "address INT NOT NULL," \
              "isContract INT NOT NULL," \
-             "amount REAL);" ;
-
-
+             "amount REAL);";
 
     std::stringstream ss;
     ss << blockTable << txTable << txReceiptTable << blocktxTable << accountTxTable;
@@ -123,7 +117,6 @@ void createRDBMSSchema(sqlite3 *db) {
 }
 
 void bindToBlockSql(sqlite3_stmt * stmt, Block b) {
-
     std::string hash = b.getHash();
     std::string parentHash = b.header.getParentHash();
     std::string sha3Uncles = b.header.getSha3Uncles();
@@ -149,7 +142,7 @@ void bindToBlockSql(sqlite3_stmt * stmt, Block b) {
     sqlite3_bind_int(stmt, 10, b.header.getDifficulty());
     sqlite3_bind_int(stmt, 11, b.header.getGasLimit());
     sqlite3_bind_int(stmt, 12, b.header.getGasUsed());
-    sqlite3_bind_double(stmt, 13, (double) b.header.getTimestamp());
+    sqlite3_bind_double(stmt, 13, static_cast<double>(b.header.getTimestamp()));
 
     sqlite3_bind_text(stmt, 14,  extraData.c_str(), strlen(extraData.c_str()), 0);
     sqlite3_bind_text(stmt, 15,  mixHash.c_str(), strlen(mixHash.c_str()), 0);
@@ -161,7 +154,6 @@ void bindToBlockSql(sqlite3_stmt * stmt, Block b) {
 }
 
 void bindToTxSql(sqlite3_stmt * stmt, Transaction transaction, size_t blockId, size_t txId) {
-
     std::string type = transaction.getType();
     std::string to = transaction.getTo();
     std::string v = transaction.getV();
@@ -191,7 +183,6 @@ void bindToTxSql(sqlite3_stmt * stmt, Transaction transaction, size_t blockId, s
     sqlite3_step(stmt);
     sqlite3_reset(stmt);
     sqlite3_clear_bindings(stmt);
-
 }
 
 void bindToBlockTxSql(sqlite3_stmt * stmt, size_t blockId, size_t txId) {
@@ -204,7 +195,6 @@ void bindToBlockTxSql(sqlite3_stmt * stmt, size_t blockId, size_t txId) {
 }
 
 void bindToTxReceiptSql(sqlite3_stmt * stmt, TransactionReceipt receipt, size_t txId) {
-
     std::string txhash =  receipt.getTransactionHash();
     std::string blockhash =  receipt.getBlockHash();
     std::string status =  receipt.getStatus();
@@ -252,11 +242,7 @@ size_t getHashId(rocksdb::DB* db_rocks, std::string hash) {
 
 bool updateHashId(rocksdb::DB* db_rocks, std::string hash, int id) {
     rocksdb::Status status = db_rocks->Put(rocksdb::WriteOptions(), hash, std::to_string(id));
-    if (status.ok()) {
-        return true;
-    }
-
-    return false;
+    return status.ok();
 }
 
 bool isAddressValid(std::string address) {
@@ -267,10 +253,10 @@ bool isAddressValid(std::string address) {
 size_t updateAndGetAccountHashId(rocksdb::DB* db_rocks, std::string hash, struct BuilderInfo &info) {
     size_t id = 0;
     if (isAddressValid(hash)) {
-        hash = info.PREFIX_ADDRESS+hash;
+        hash = info.PREFIX_ADDRESS + hash;
         id = getHashId(db_rocks, hash);
 
-        if ( id == 0) {
+        if (id == 0) {
             // no id is associated with this hash
             id = info.nextAddressId;
             updateHashId(db_rocks, hash, id);
@@ -278,28 +264,18 @@ size_t updateAndGetAccountHashId(rocksdb::DB* db_rocks, std::string hash, struct
         }
     }
     return id;
-
 }
 
-int startTransaction(sqlite3 *db){
+int startTransaction(sqlite3 *db) {
     char* errorMessage;
-    // sqlite3_exec(db, "PRAGMA synchronous=OFF", NULL, NULL, &errorMessage);
-    // sqlite3_exec(db, "PRAGMA count_changes=OFF", NULL, NULL, &errorMessage);
-    // sqlite3_exec(db, "PRAGMA journal_mode=MEMORY", NULL, NULL, &errorMessage);
-    // sqlite3_exec(db, "PRAGMA temp_store=MEMORY", NULL, NULL, &errorMessage);
-    // sqlite3_exec(db, "PRAGMA cache_size=10000", NULL, NULL, &errorMessage);
     return sqlite3_exec(db, "BEGIN TRANSACTION", nullptr, nullptr, &errorMessage);
 }
-int endTransaction(sqlite3 *db){
+int endTransaction(sqlite3 *db) {
     char* errorMessage;
     return sqlite3_exec(db, "COMMIT TRANSACTION", nullptr, nullptr, &errorMessage);
 }
 
-void storeBlockInRDBMS(
-        struct StoreBasicArgs * basic_args,
-        Block block
-) {
-
+void storeBlockInRDBMS(struct StoreBasicArgs * basic_args, Block block) {
     /*
      *  Block sqlite and rocksdb
      */
@@ -316,7 +292,7 @@ void storeBlockInRDBMS(
         pthread_mutex_lock(&(basic_args->txbuffer->mutex));
 
         // check whether if the buffer is full
-        if(basic_args->txbuffer->occupied >= TX_BUFFER_SIZE) {
+        if (basic_args->txbuffer->occupied >= TX_BUFFER_SIZE) {
             // wait till consumer process a transaction
             pthread_cond_wait(&(basic_args->txbuffer->wait_on_full_tx), &(basic_args->txbuffer->mutex));
         }
@@ -349,11 +325,11 @@ void * consumer_store_transactions(void * params) {
      */
     auto * basic_args = (struct StoreBasicArgs *)params;
 
-    while((!(*(basic_args->isMasterOver))) || (*(basic_args->isMasterOver) && basic_args->txbuffer->occupied > 0) ) {
+    while ((!(*(basic_args->isMasterOver))) || (*(basic_args->isMasterOver) && basic_args->txbuffer->occupied > 0) ) {
         pthread_mutex_lock(&(basic_args->txbuffer->mutex));
 
         // check whether if there's new transactions added to the buffer
-        if(basic_args->txbuffer->occupied <= 0) {
+        if (basic_args->txbuffer->occupied <= 0) {
             // wait till a transaction is added to the buffer
             pthread_cond_wait(&(basic_args->txbuffer->wait_on_no_tx), &(basic_args->txbuffer->mutex));
         }
@@ -364,8 +340,8 @@ void * consumer_store_transactions(void * params) {
         }
         // get the next transaction from the buffer to process
         Transaction transaction = basic_args->txbuffer->buffer[basic_args->txbuffer->next_out];
-        basic_args->txbuffer->next_out = (basic_args->txbuffer->next_out+1)%TX_BUFFER_SIZE;
-        basic_args->txbuffer->occupied --;
+        basic_args->txbuffer->next_out = (basic_args->txbuffer->next_out + 1) % TX_BUFFER_SIZE;
+        basic_args->txbuffer->occupied--;
 
         // signal for producer if it's waiting on the full buffer
         pthread_cond_signal(&(basic_args->txbuffer->wait_on_full_tx));
@@ -378,12 +354,6 @@ void * consumer_store_transactions(void * params) {
         bindToTxSql(basic_args->stmt_tx, transaction, block_id, basic_args->info.nextTxId);
         bindToBlockTxSql(basic_args->stmt_blocktx, block_id, basic_args->info.nextTxId);
         bindToTxReceiptSql(basic_args->stmt_txreceipt, receipt, basic_args->info.nextTxId);
-
-        /*
-         * todo
-         * Optimization hint : Give the below part to another thread by adding the information to a buffer.
-         *
-         */
 
         // rocksdb : transaction hash -> id mapping
         updateHashId(basic_args->db_rocks, basic_args->info.PREFIX_TX+transaction.getHash(), basic_args->info.nextTxId);
@@ -402,8 +372,5 @@ void * consumer_store_transactions(void * params) {
 
         basic_args->info.nextTxId++;
     }
+    return params;
 }
-
-
-
-
