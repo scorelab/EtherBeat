@@ -77,7 +77,9 @@ For an example, Let's parse 100000 blocks. you can change the value. Also give t
 3. compile other dependencies
    - `cd /usr/src`
    - `./docker_setup.sh`
-4. run (Let's parse 100000 blocks. you can change the value)
+4. export library path
+   - `export LD_LIBRARY_PATH=/usr/local/lib`
+5. run (Let's parse 100000 blocks. you can change the value)
    - `cd /usr/src/EtherBeat/tools/EtherBuilder/build`
    - `./EtherBuilder 100000 /mnt/rinkeby/geth/chaindata /mnt/dbsqlite /mnt/dbrocks`
 

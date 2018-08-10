@@ -87,4 +87,4 @@ rm -R /mnt/dbsqlite
 mkdir /mnt/dbrocks
 mkdir /mnt/dbsqlite
 
-
+printf "EtherExtractor Library Built Finished\n\n"
