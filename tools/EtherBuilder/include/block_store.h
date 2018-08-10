@@ -1,6 +1,6 @@
 /*
  * Created by prabushitha on 6/12/18.
- * Copyright [2018] <Umesh Jayasinghe>
+ * Copyright [2018] <ScoreLab Organization>
 */
 #ifndef TOOLS_ETHERBUILDER_INCLUDE_BLOCK_STORE_H_
 #define TOOLS_ETHERBUILDER_INCLUDE_BLOCK_STORE_H_

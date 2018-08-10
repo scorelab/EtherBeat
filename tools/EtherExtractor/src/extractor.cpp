@@ -1,5 +1,6 @@
 /*
  * Created by prabushitha on 5/19/18.
+ * Copyright [2018] <ScoreLab Organization>
 */
 #include "extractor.h"
 #include "rlp.h"
@@ -13,7 +14,7 @@ EtherExtractor::EtherExtractor(std::string db_path) {
     // leveldb::DB* db;
     options.create_if_missing = true;
     leveldb::Status status = leveldb::DB::Open(options, db_path, &db);
-    if (!status.ok()){
+    if (!status.ok()) {
         delete db;
         throw;
     }
@@ -40,7 +41,6 @@ Block EtherExtractor::getBlock(uint64_t blockNumber) {
 }
 
 Block EtherExtractor::getBlock(std::string blockHashHex) {
-
     blockHashHex = remove0xFromString(blockHashHex);
 
     std::vector<uint8_t > hexval = hex_to_bytes(blockHashHex);
@@ -63,18 +63,16 @@ Block EtherExtractor::getBlock(std::string blockHashHex) {
     } else {
         printf("INVALID HASH : %s\n", shk.ToString().c_str());
     }
-
     throw;
 }
 
-Block EtherExtractor::getBlock(uint64_t blockNumber, std::string blockHash){
-
+Block EtherExtractor::getBlock(uint64_t blockNumber, std::string blockHash) {
     std::string headerKey = createBlockHeaderKey(blockNumber, blockHash);
 
     std::string blockHeaderData;
     leveldb::Status sbhd = db->Get(leveldb::ReadOptions(), headerKey, &blockHeaderData);
 
-    if (sbhd.ok()){
+    if (sbhd.ok()) {
         // Header content retrieval success
         std::vector<uint8_t> header_content;
         header_content = getByteVector(blockHeaderData);
@@ -103,11 +101,7 @@ Block EtherExtractor::getBlock(uint64_t blockNumber, std::string blockHash){
 
             RLP rlp_body{body_content};
             updateBody(&block, body_content, rlp_body);
-
-            // std::vector<TransactionReceipt> receipts = getBlockTxReceipts(blockNumber, blockHash);
-
-
-        }else{
+        } else {
             printf("\n Body Not Found \n");
         }
 
@@ -116,12 +110,10 @@ Block EtherExtractor::getBlock(uint64_t blockNumber, std::string blockHash){
         return block;
     }
 
-
     throw;
 }
 // get transaction receipt
 TransactionReceipt EtherExtractor::getTransactionReceipt(std::string transactionHashHex) {
-
     transactionHashHex = remove0xFromString(transactionHashHex);
 
     // creating block hash byte string
@@ -134,7 +126,7 @@ TransactionReceipt EtherExtractor::getTransactionReceipt(std::string transaction
     std::string txReceiptMetaData;
     leveldb::Status srmd = db->Get(leveldb::ReadOptions(), lookupKey, &txReceiptMetaData);
 
-    if(srmd.ok()) {
+    if (srmd.ok()) {
         std::vector<uint8_t> receipt_contents;
         receipt_contents = getByteVector(txReceiptMetaData);
 
@@ -151,13 +143,12 @@ TransactionReceipt EtherExtractor::getTransactionReceipt(std::string transaction
 }
 // get tx receipts of the block
 std::vector<TransactionReceipt> EtherExtractor::getBlockTxReceipts(uint64_t blockNumber, std::string blockHash) {
-
     std::string receiptsKey = createBlockReceiptKey(blockNumber, blockHash);
 
     std::string blockReceiptData;
     leveldb::Status sbrd = db->Get(leveldb::ReadOptions(), receiptsKey, &blockReceiptData);
 
-    if (sbrd.ok()){
+    if (sbrd.ok()) {
         std::vector<uint8_t> receipt_contents;
         receipt_contents = getByteVector(blockReceiptData);
 
@@ -177,29 +168,27 @@ std::string EtherExtractor::createBlockHashKey(uint64_t blockNumber) {
     return getKeyString(headerPrefix, &toBigEndianEightBytes(blockNumber)[0], numSuffix, 1, 8, 1);
 }
 
-//get block header key
+// get block header key
 std::string EtherExtractor::createBlockHeaderKey(uint64_t blockNumber, std::string blockHash) {
-    return getKeyString(headerPrefix, &toBigEndianEightBytes(blockNumber)[0], (uint8_t *)&blockHash[0], 1, 8, 32);
+    return getKeyString(headerPrefix, &toBigEndianEightBytes(blockNumber)[0], reinterpret_cast<uint8_t *>(&blockHash[0]), 1, 8, 32);
 }
 
-//get block body key
+// get block body key
 std::string EtherExtractor::createBlockBodyKey(uint64_t blockNumber, std::string blockHash) {
-    return getKeyString(bodyPrefix, &toBigEndianEightBytes(blockNumber)[0], (uint8_t *)&blockHash[0], 1, 8, 32);
+    return getKeyString(bodyPrefix, &toBigEndianEightBytes(blockNumber)[0], reinterpret_cast<uint8_t *>(&blockHash[0]), 1, 8, 32);
 }
 
-//get block receipts key
+// get block receipts key
 std::string EtherExtractor::createBlockReceiptKey(uint64_t blockNumber, std::string blockHash) {
-    return getKeyString(blockReceiptsPrefix, &toBigEndianEightBytes(blockNumber)[0], (uint8_t *)&blockHash[0], 1, 8, 32);
+    return getKeyString(blockReceiptsPrefix, &toBigEndianEightBytes(blockNumber)[0], reinterpret_cast<uint8_t *>(&blockHash[0]), 1, 8, 32);
 }
 
-//get tx lookup key
+// get tx lookup key
 std::string EtherExtractor::createLookupKey(std::string transactionHash) {
-    return getKeyString(lookupPrefix, (uint8_t *)&transactionHash[0], {}, 1, 32, 0);
+    return getKeyString(lookupPrefix, reinterpret_cast<uint8_t *>(&transactionHash[0]), {}, 1, 32, 0);
 }
 
-
-void EtherExtractor::updateHeader(Header *header, std::vector<uint8_t> contents, RLP & rlp){
-
+void EtherExtractor::updateHeader(Header *header, std::vector<uint8_t> contents, RLP & rlp) {
     header->parentHash_bytes = createByteVector(contents, rlp[0]);
     header->sha3Uncles_bytes = createByteVector(contents, rlp[1]);
     header->beneficiary_bytes = createByteVector(contents, rlp[2]);
@@ -215,20 +204,19 @@ void EtherExtractor::updateHeader(Header *header, std::vector<uint8_t> contents,
     header->extraData_bytes = createByteVector(contents, rlp[12]);
     header->mixHash_bytes = createByteVector(contents, rlp[13]);
     header->nonce_bytes = createByteVector(contents, rlp[14]);
-
 }
 
-void EtherExtractor::updateBody(Block *block, std::vector<uint8_t> contents, RLP & rlp){
+void EtherExtractor::updateBody(Block *block, std::vector<uint8_t> contents, RLP & rlp) {
     if (rlp.numItems() > 1) {
         int i;
         // get transactions
-        for(i=0; i<rlp[0].numItems(); i++) {
+        for (i = 0; i < rlp[0].numItems(); i++) {
             // todo : check if transaction contains valid number of fields
             Transaction transaction;
             transaction.nonce_bytes = createByteVector(contents, rlp[0][i][0]);
             transaction.gasPrice_bytes = createByteVector(contents, rlp[0][i][1]);
             transaction.gasLimit_bytes = createByteVector(contents, rlp[0][i][2]);
-            transaction.to_bytes = createByteVector(contents, rlp[0][i][3]); // empty for contract creation
+            transaction.to_bytes = createByteVector(contents, rlp[0][i][3]);  // empty for contract creation
             transaction.value_bytes = createByteVector(contents, rlp[0][i][4]);
             transaction.init_bytes = createByteVector(contents, rlp[0][i][5]);
 
@@ -242,29 +230,26 @@ void EtherExtractor::updateBody(Block *block, std::vector<uint8_t> contents, RLP
 
             transaction.from_bytes = transaction.recoverTxSender();
 
-            if(transaction.from_bytes.size() == 0) {
+            if (transaction.from_bytes.size() == 0) {
                 printf("Block %d Transaction %d Address Not Found\n", bytesVectorToInt(block->header.number_bytes), i+1);
             }
 
             block->transactions.insert(block->transactions.end(), transaction);
-
         }
 
         // todo : check below code after a full node.
         // get ommers
         std::vector<std::vector<uint8_t>> ommerHashes;
 
-        for(i=0; i<rlp[1].numItems(); i++) {
+        for (i = 0; i < rlp[1].numItems(); i++) {
             std::vector<uint8_t> ommerHash = createByteVector(contents, rlp[1][i]);
             ommerHashes.insert(ommerHashes.end(), ommerHash);
         }
         block->ommerHashes_bytes = ommerHashes;
     }
-
 }
 
 void EtherExtractor::updateTxReceiptMeta(TransactionReceiptMeta *meta, std::vector<uint8_t> contents, RLP & rlp) {
-
     if (rlp.numItems() == 3) {
         std::vector<uint8_t> tempVec =  createByteVector(contents, rlp[0]);
         meta->blockHash = std::string(tempVec.begin(), tempVec.end());
@@ -277,9 +262,9 @@ void EtherExtractor::updateTxReceiptMeta(TransactionReceiptMeta *meta, std::vect
     }
 }
 
-void EtherExtractor::updateTxReceipts(std::vector<TransactionReceipt> *receipts, uint64_t blockNumber, std::vector<uint8_t> blockHash, std::vector<uint8_t> contents, RLP & rlp){
+void EtherExtractor::updateTxReceipts(std::vector<TransactionReceipt> *receipts, uint64_t blockNumber, std::vector<uint8_t> blockHash, std::vector<uint8_t> contents, RLP & rlp) {
     int i;
-    for (i=0; i<rlp.numItems(); i++) {
+    for (i = 0; i < rlp.numItems(); i++) {
         TransactionReceipt receipt;
 
         receipt.blockNumber = blockNumber;
@@ -311,37 +296,18 @@ std::vector<uint8_t> EtherExtractor::createByteVector(std::vector<uint8_t> conte
 *   ACCOUNT RELATED PARSING
 *
 */
-
 Account EtherExtractor::getAccount(std::string address) {
     // todo : get the latest block number
-    uint64_t latestBlock = 100;//189154;
+    uint64_t latestBlock = 100;
     return getAccount(address, latestBlock);
 }
 
+/*
+ * Function to get account from state given a block height
+ * todo : Not implemented. has to implement using merkel patricia tree
+ */
 Account EtherExtractor::getAccount(std::string address, uint64_t blockHeight) {
-    // todo : not implemented. has to implement using merkel patricia tree
     Block b = getBlock(blockHeight);
-
-    if(!b.header.stateRoot_bytes.empty()){
-
-        // std::vector<uint8_t > raw_key = getByteVector(address);
-        // std::vector<uint8_t > hash_key = keccak_256(raw_key);
-        // std::string key = hexStr((unsigned char *)&hash_key[0], hash_key.size());
-
-        std::string value;
-
-        // Get byte string of state root
-        std::string stateRoot (b.header.stateRoot_bytes.begin(), b.header.stateRoot_bytes.end());
-        leveldb::Status status = db->Get(leveldb::ReadOptions(), stateRoot, &value);
-
-        if (status.ok()) {
-            printf("ADDRESS FOUND\n");
-            print_bytes(value);
-        }else {
-            printf("ADDRESS NOT FOUND\n");
-        }
-    }
-
 
     Account account;
 

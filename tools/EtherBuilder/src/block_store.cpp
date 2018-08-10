@@ -1,6 +1,6 @@
 /*
  * Created by prabushitha on 7/1/18.
- * Copyright [2018] <Umesh Jayasinghe>
+ * Copyright [2018] <ScoreLab Organization>
 */
 #include "block_store.h"
 #include "rocksdb/db.h"

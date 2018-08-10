@@ -64,8 +64,27 @@ git clone https://github.com/prabushitha/EtherBeat.git
 cd EtherBeat
 git checkout parser
 cd tools/EtherExtractor
-chmod +x build_library.sh
-./build_library.sh
 
+# build EtherExtractor as a library
+rm -rf build
+mkdir build
+cd build
+cmake .. -DIS_LIBRARY=TRUE
+make
+printf "EtherExtractor Library Built Finished\n\n"
+
+# build EtherBuilder
+cd /usr/src/EtherBeat/tools/EtherBuilder
+mkdir build
+cd build
+cmake ..
+make
+
+# create directories for databases
+rm -R /mnt/dbrocks
+rm -R /mnt/dbsqlite
+
+mkdir /mnt/dbrocks
+mkdir /mnt/dbsqlite
 
 

@@ -1,5 +1,6 @@
 /*
  * Created by prabushitha on 6/6/18.
+ * Copyright [2018] <ScoreLab Organization>
 */
 #include <gtest/gtest.h>
 #include "utils.h"
@@ -59,9 +60,9 @@ TEST(Test_Big_Endian, VeryLargeNumber) {
 
 
 TEST(Keystring, PrefixMiddleSuffix) {
-    uint8_t prefix[3] = {1,2,3};
-    uint8_t middle[2] = {1,3};
-    uint8_t suffix[2] = {4,5};
+    uint8_t prefix[3] = {1, 2, 3};
+    uint8_t middle[2] = {1, 3};
+    uint8_t suffix[2] = {4, 5};
     std::string key = getKeyString(prefix, middle, suffix, 3, 2, 2);
     EXPECT_EQ(key, "\001\002\003\001\003\004\005");
 }

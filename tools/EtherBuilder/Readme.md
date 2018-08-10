@@ -8,6 +8,9 @@ Tool to store ethereum blockchain in order to support analysis. SQLite database 
 - pthread
 - ethereum_extractor (tools/EtherExtractor)
 
+
+*Note - All the dependencies for EtherExtractor should be available
+
 ## Quick Guide
 
 ### EtherExtractor Setup
@@ -36,15 +39,34 @@ Tool to store ethereum blockchain in order to support analysis. SQLite database 
 4. set to `LD_LIBRARY_PATH` (usually rocksdb installed in /usr/lib but some environments like arch it's installed in /usr/local/lib)
    - `export LD_LIBRARY_PATH=/usr/lib`
 
-5. create a directory for rocksdb
+5. create a directory for rocksdb database
    - `mkdir /tmp/dbrocks`
 
+### Build EtherBuilder
 
-### Running Builder
+Use below commands to build
+```sh
+export LD_LIBRARY_PATH=/usr/local/lib
 
-Let's parse 100000 blocks. you can change the value. Also give the correct path to the blockchain containing chaindata directory.
+rm -rf build
+mkdir build
+cd build
 
-`./run.sh 100000 /path/to/chaindata`
+cmake ..
+make
+```
+
+### Running EtherBuilder
+
+Goto the build directory and execute EtherBuilder. Execution command format,
+
+`./EtherBuilder numblocks /pathto/chaindata /pathto/dbsqlite /pathto/dbrocks`
+
+
+For an example, Let's parse 100000 blocks. you can change the value. Also give the correct path to the blockchain containing chaindata directory.
+
+`./EtherBuilder 1000 /home/user/.ethereum/geth/chaindata /tmp/dbsqlite /tmp/dbrocks`
+
 
 ## Docker Guide
 
@@ -56,8 +78,29 @@ Let's parse 100000 blocks. you can change the value. Also give the correct path 
    - `cd /usr/src`
    - `./docker_setup.sh`
 4. run (Let's parse 100000 blocks. you can change the value)
-   - `cd /usr/src/EtherBeat/tools/EtherBuilder`
-   - `./run.sh 100000`
+   - `cd /usr/src/EtherBeat/tools/EtherBuilder/build`
+   - `./EtherBuilder 100000 /mnt/rinkeby/geth/chaindata /mnt/dbsqlite /mnt/dbrocks`
+
+## Developer Guide
+
+#### Running tests
+```sh
+#!/usr/bin/env bash
+export LD_LIBRARY_PATH=/usr/local/lib
+# Compiling
+rm -rf build
+mkdir build
+cd build
+cmake ..
+make
+
+# Running tests
+./test_extractor
+```
+
+#### Coding standards
+Follow [Google's C++ style guide](http://google.github.io/styleguide/cppguide.html). To enforce standards, you can use [cpplint](https://github.com/cpplint/cpplint)
+
 
 
 ## Functionality list

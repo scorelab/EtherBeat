@@ -1,6 +1,6 @@
 /*
  * Created by prabushitha on 7/1/18.
- * Copyright [2018] <Umesh Jayasinghe>
+ * Copyright [2018] <ScoreLab Organization>
 */
 #ifndef TOOLS_ETHERBUILDER_INCLUDE_TIMING_H_
 #define TOOLS_ETHERBUILDER_INCLUDE_TIMING_H_

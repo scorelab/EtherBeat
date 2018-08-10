@@ -4,31 +4,61 @@ A tool which connects to the leveldb ethereum blockchain (currently supports Get
 
 
 ## Quick Guide
-### Dependencies
+#### Dependencies
 Install the below dependencies in your environment.
  - leveldb
-   - In Arch use, `pacman -S leveldb`
  - cryptopp
-   - In Arch use, `pacman -S crypto++`
  - secp256k1
-   - In Arch use, `pacman -S libsecp256k1`
  - gtest
-   - In Arch use, `pacman -S gtest`
 
-### Running the project
- - `./run.sh`
+#### Running the project
+- Compile as a <b>Library</b> or use as a <b>Standalone Application</b>
 
-### Create a library and using it in your project
- - `./build_library.sh`
-
-<hr />
 
 ## How to use EtherExtractor?
 
-There are 2 ways of using EtherExtractor. 
-#### 1. Standalone  
-You can directly use the source files and write your own application. (See `src/main.cpp`). See `CMakeLists.txt` and `run.sh` . Below is an example usage.
+There are 2 ways of using EtherExtractor.
+#### 1. As a Library
+You can use this as a library.
 
+##### Compiling as a library
+```sh
+#!/usr/bin/env bash
+
+rm -rf build
+mkdir build
+cd build
+cmake .. -DIS_LIBRARY=TRUE
+make
+```
+After compile using above commands, you'll find the library .so file in `EtherExtractor/build/libethereum_extractor.so`
+
+
+(Check EtherBuilder which uses EtherExtractor as a library for a sample implementation)
+
+#### 2. Standalone
+You can directly use the source files and write your own application. (See `src/main.cpp`). See `CMakeLists.txt` if you want to change the make instructions.
+
+##### Compiling and running
+
+```sh
+#!/usr/bin/env bash
+
+export LD_LIBRARY_PATH=/usr/local/lib
+
+# Compiling
+
+rm -rf build
+mkdir build
+cd build
+cmake ..
+make
+
+# Running
+./ethereum_extractor
+```
+
+##### Example usage :
 ```cpp
 #include "extractor.h"
 ...
@@ -54,11 +84,25 @@ for (Transaction transaction : block1.transactions) {
 ```
 Check `EtherExtractor/include/block.h` for available methods of block, block header, transaction & transaction receipt.
 
-#### 2. As a Library 
-You can use this as a library.  Compile using `build_library.sh`. Then you'll find the library .so file in `EtherExtractor/build/libethereum_extractor.solibethereum_extractor.so`
+## Developer Guide
 
-(Check EtherBuilder which uses EtherExtractor as a library for a sample implementation) 
+#### Running tests
+```sh
+#!/usr/bin/env bash
+export LD_LIBRARY_PATH=/usr/local/lib
+# Compiling
+rm -rf build
+mkdir build
+cd build
+cmake ..
+make
 
+# Running tests
+./test_extractor
+```
+
+#### Coding standards
+Follow [Google's C++ style guide](http://google.github.io/styleguide/cppguide.html). To enforce standards, you can use [cpplint](https://github.com/cpplint/cpplint)
 
 <hr/>
 

@@ -1,5 +1,6 @@
 /*
  * Created by prabushitha on 5/29/18.
+ * Copyright [2018] <ScoreLab Organization>
 */
 #include <account.h>
 #include <utils.h>

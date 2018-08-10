@@ -1,5 +1,6 @@
 /*
  * Created by prabushitha on 7/1/18.
+ * Copyright [2018] <ScoreLab Organization>
 */
 
 // INSERTION SQL STRINGS
@@ -13,7 +14,7 @@ char const *sql_blocktx = "INSERT INTO blocktx (blockId, txId) "  \
          "VALUES (?, ?); " ;
 
 char const *sql_txreceipt = "INSERT INTO txreceipt (id , txHash, blockHash, blockNumber, transactionIndex, status, gasUsed, cumulativeGasUsed, contractAddress, logsBloom) "  \
-         "VALUES (? , ?, ?, ?, ?, ?, ?, ?, ?, ?); " ;
+         "VALUES (? , ?, ?, ?, ?, ?, ?, ?, ?, ?); ";
 
 char const *sql_fromto = "INSERT INTO fromto (sender , receiver, amount, txid) "  \
-         "VALUES (?, ?, ?, ?); " ;
+         "VALUES (?, ?, ?, ?); ";
