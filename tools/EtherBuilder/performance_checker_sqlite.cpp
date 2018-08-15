@@ -94,11 +94,6 @@ void transactionsWithOptionsInsertions(sqlite3 *db) {
     char *zErrMsg = 0;
     int rc;
 
-//    sqlite3_exec(db, "PRAGMA synchronous=OFF", NULL, NULL, &zErrMsg);
-//    sqlite3_exec(db, "PRAGMA count_changes=OFF", NULL, NULL, &zErrMsg);
-//    sqlite3_exec(db, "PRAGMA journal_mode=MEMORY", NULL, NULL, &zErrMsg);
-//    sqlite3_exec(db, "PRAGMA temp_store=MEMORY", NULL, NULL, &zErrMsg);
-//    sqlite3_exec(db, "PRAGMA cache_size=10000", NULL, NULL, &zErrMsg);
     sqlite3_exec(db, "BEGIN TRANSACTION", NULL, NULL, &zErrMsg);
 
     int i;
@@ -118,11 +113,7 @@ int transactionsWithPrepared(sqlite3 *db) {
     long int startTime = getTime();
 
     char* errorMessage;
-    // sqlite3_exec(db, "PRAGMA synchronous=OFF", NULL, NULL, &errorMessage);
-    // sqlite3_exec(db, "PRAGMA count_changes=OFF", NULL, NULL, &errorMessage);
-    // sqlite3_exec(db, "PRAGMA journal_mode=MEMORY", NULL, NULL, &errorMessage);
-    // sqlite3_exec(db, "PRAGMA temp_store=MEMORY", NULL, NULL, &errorMessage);
-    // sqlite3_exec(db, "PRAGMA cache_size=10000", NULL, NULL, &errorMessage);
+
     sqlite3_exec(db, "BEGIN TRANSACTION", NULL, NULL, &errorMessage);
 
     char const *szSQL = "INSERT INTO research_tbl (col1, col2, col3) VALUES (?,?,?);";
@@ -130,7 +121,7 @@ int transactionsWithPrepared(sqlite3 *db) {
     int rc = sqlite3_prepare(db, szSQL, -1, &pStmt, nullptr);
 
     if( rc == SQLITE_OK ) {
-        for(int x=0;x<NUMBER_OF_INSERTIONS;x++){
+        for(int x=0;x<NUMBER_OF_INSERTIONS;x++) {
             // bind the value
             std::string col1 = "a_"+std::to_string(x+1);
             std::string col2 = "b";
@@ -148,8 +139,7 @@ int transactionsWithPrepared(sqlite3 *db) {
         }
         sqlite3_finalize(pStmt);
         sqlite3_exec(db, "COMMIT TRANSACTION", NULL, NULL, &errorMessage);
-        // sqlite3_finalize(pStmt);
-    }else{
+    } else {
         fprintf(stderr, "SQL error: %s\n", errorMessage);
         sqlite3_free(errorMessage);
     }
@@ -171,12 +161,7 @@ int main() {
         fprintf(stderr, "SQLite db connected\n");
     }
 
-    // transactionInsertions(db_sqlite);
-    // planeInsertions(db_sqlite);
-    // transactionsWithOptionsInsertions(db_sqlite);
     transactionsWithPrepared(db_sqlite);
-
-
 
 }
 
