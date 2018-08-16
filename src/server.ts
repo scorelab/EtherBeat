@@ -110,7 +110,7 @@ app.get("/auth/github/callback",
     res.redirect("/graphql");
   });
 
-app.get("/login", function(req, res){
+app.get("/login", function(req, res) {
   res.redirect("/auth/github");
 });
 
