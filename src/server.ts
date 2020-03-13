@@ -114,6 +114,14 @@ app.get("/login", function(req, res) {
   res.redirect("/auth/github");
 });
 
+//LOCAL LOGIN LOGIC ROUTE
+app.post("/login",passport.authenticate("local",{ 
+  failureRedirect:"/login",
+  failureFlash:"Invalid email or password"
+}),(req,res)=>{
+  res.redirect("/");
+});
+
 app.get("/logout", (req, res) => {
   req.logout();
   res.redirect("/");
