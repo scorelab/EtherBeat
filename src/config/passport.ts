@@ -62,7 +62,7 @@ passport.use(new LocalStrategy({
       });
     }); 
   }
-)
+));
 
 /**
  * Login Required middleware.
