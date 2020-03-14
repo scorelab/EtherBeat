@@ -46,11 +46,11 @@ passport.use(new GitHubStrategy({
   }
 ));
 
-passport.use(new LocalStrategy({ 
-  usernameField: 'email'
+passport.use(new LocalStrategy({
+  usernameField: "email"
 },
-  (email, password, done)=> {
-    //FIRST USER SCHEMA NEEDS TO BE CREATED
+  (email, password, done) => {
+  // FIRST USER SCHEMA NEEDS TO BE CREATED
   //   User.findOne({ email },(err, user:any)=>{
   //     if (err) { return done(err); }
   //     if (!user) {
@@ -61,7 +61,7 @@ passport.use(new LocalStrategy({
   //       if(result) return done(null, user);
   //       return done(null, false, { message: 'Incorrect password.' });
   //     });
-  //   }); 
+  //   });
   }
 ));
 
