@@ -1,12 +1,14 @@
 import * as passport from "passport";
-import * as request from "request";
 import * as passportGithub from "passport-github2";
+import * as passportLocal from "passport-local";
+import * as bcrypt from "bcryptjs";
 import * as _ from "lodash";
 
 // import { default as User } from "../models/User";
 import { Request, Response, NextFunction } from "express";
 
 const GitHubStrategy = passportGithub.Strategy;
+const LocalStrategy  = passportLocal.Strategy;
 
 passport.serializeUser<any, any>((user, done) => {
   done(undefined, user.id);
@@ -41,6 +43,25 @@ passport.use(new GitHubStrategy({
 },
   (accessToken: any, refreshToken: any, profile: any, done: any) => {
     return done(undefined, profile);
+  }
+));
+
+passport.use(new LocalStrategy({
+  usernameField: "email"
+},
+  (email, password, done) => {
+  // FIRST USER SCHEMA NEEDS TO BE CREATED
+  //   User.findOne({ email },(err, user:any)=>{
+  //     if (err) { return done(err); }
+  //     if (!user) {
+  //       return done(null, false, { message: 'Email not registered' });
+  //     }
+  //     bcrypt.compare(password, user.password,(err:Error, result:boolean)=>{
+  //       if(err) return done(err);
+  //       if(result) return done(null, user);
+  //       return done(null, false, { message: 'Incorrect password.' });
+  //     });
+  //   });
   }
 ));
 

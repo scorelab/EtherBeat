@@ -110,8 +110,16 @@ app.get("/auth/github/callback",
     res.redirect("/graphql");
   });
 
-app.get("/login", function(req, res) {
+app.get("/login", (req, res) => {
   res.redirect("/auth/github");
+});
+
+// LOCAL LOGIN LOGIC ROUTE
+app.post("/login", passport.authenticate("local", {
+  failureRedirect: "/login",
+  failureFlash: "Invalid email or password"
+}), (req, res) => {
+  res.redirect("/");
 });
 
 app.get("/logout", (req, res) => {
