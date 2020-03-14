@@ -50,17 +50,18 @@ passport.use(new LocalStrategy({
   usernameField: 'email'
 },
   (email, password, done)=> {
-    User.findOne({ email },(err, user:any)=>{
-      if (err) { return done(err); }
-      if (!user) {
-        return done(null, false, { message: 'Email not registered' });
-      }
-      bcrypt.compare(password, user.password,(err:Error, result:boolean)=>{
-        if(err) return done(err);
-        if(result) return done(null, user);
-        return done(null, false, { message: 'Incorrect password.' });
-      });
-    }); 
+    //FIRST USER SCHEMA NEEDS TO BE CREATED
+  //   User.findOne({ email },(err, user:any)=>{
+  //     if (err) { return done(err); }
+  //     if (!user) {
+  //       return done(null, false, { message: 'Email not registered' });
+  //     }
+  //     bcrypt.compare(password, user.password,(err:Error, result:boolean)=>{
+  //       if(err) return done(err);
+  //       if(result) return done(null, user);
+  //       return done(null, false, { message: 'Incorrect password.' });
+  //     });
+  //   }); 
   }
 ));
 
