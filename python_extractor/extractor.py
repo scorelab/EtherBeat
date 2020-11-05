@@ -59,8 +59,9 @@ def parall(blockNumbers):
         count = len(block)
         if count > 0:
             blockEx = g.V().hasLabel("block").has('number', blockNumber).toList()
+            count_ = len(blockEx)
 
-            if len(blockEx) == 0:
+            if count_ == 0:
                 blockV = g.addV('block').property('number', blockNumber).next()
             else:
                 blockV = blockEx[0]
@@ -68,7 +69,7 @@ def parall(blockNumbers):
             # Add transactions
             subtraces = 0
             prevTx = None
-            for index in range(len(block)):
+            for index in range(count):
                 tx = block[index]
 
                 if 'error' in tx:
